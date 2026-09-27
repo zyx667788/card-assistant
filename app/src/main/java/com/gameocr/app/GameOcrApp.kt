@@ -33,7 +33,7 @@ class GameOcrApp : Application(), Configuration.Provider {
 
     /**
      * Application-scope 协程容器。Activity / Service 销毁不取消，可承接「Activity 提交任务后立刻 finish」
-     * 这类不依赖宿主生命周期的后台工作（如 [com.gameocr.app.translate.ProcessTextTranslateActivity]
+     * 这类不依赖宿主生命周期的后台工作（如 后台工作
      * 在 ACTION_PROCESS_TEXT 回调里跑翻译 → 弹 overlay 卡片）。
      */
     internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)

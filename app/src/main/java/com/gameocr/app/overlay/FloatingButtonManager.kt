@@ -118,7 +118,7 @@ class FloatingButtonManager(
         InputTranslationDoubleAction.FULL_SCREEN
 
     /** 弧菜单按钮顺序（来自 Settings.floatingMenuItemOrder）。CaptureService 在 settings collect 时同步。 */
-    @Volatile var menuItemOrder: List<MenuItemId> = FloatingMenu.DEFAULT_ORDER
+    @Volatile var menuItemOrder: List<MenuItemId> = FloatingMenu.GAME_ASSISTANT_ORDER
     @Volatile var arcMenuPageSize: Int = FloatingMenu.DEFAULT_PAGE_SIZE
     @Volatile var firstUseTourPending: Boolean = false
     @Volatile var onFirstUseTourCompleted: () -> Unit = {}

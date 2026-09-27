@@ -6,6 +6,7 @@ import com.gameocr.app.game.core.AdviceEngine
 import com.gameocr.app.game.core.GameModule
 import com.gameocr.app.game.paohuzi.PaohuziGameModule
 import com.gameocr.app.game.paohuzi.PaohuziPromptPolicy
+import com.gameocr.app.game.paohuzi.PaohuziVlmBoardRecognizer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -25,11 +26,15 @@ object GameModuleBindings {
 
     @Provides
     @IntoSet
-    fun providePaohuziModule(@ApplicationContext context: Context): GameModule =
+    fun providePaohuziModule(
+        @ApplicationContext context: Context,
+        recognizer: PaohuziVlmBoardRecognizer,
+    ): GameModule =
         PaohuziGameModule(
             promptPolicy = PaohuziPromptPolicy(
                 rulesSummary = readRulesSummary(context, PAOHUZI_RULES_ASSET),
             ),
+            recognizer = recognizer,
         )
 
     @Provides

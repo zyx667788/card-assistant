@@ -170,19 +170,8 @@ dependencies {
     implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
 
-    // ML Kit (latin + 日 + 中 + 韩，四种端侧识别器；AUTO 模式按文字类型挑选)
-    implementation(libs.mlkit.text.recognition)
-    implementation(libs.mlkit.text.recognition.japanese)
-    implementation(libs.mlkit.text.recognition.chinese)
-    implementation(libs.mlkit.text.recognition.korean)
-    implementation(libs.mlkit.translate)
-    implementation("com.google.mlkit:language-id:17.0.6")
-
-    // DataStore / Room
+    // DataStore / exif
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.exifinterface)
 
     // 物理动画：悬浮球松手吸边用 SpringAnimation
@@ -198,13 +187,6 @@ dependencies {
     // Shizuku
     implementation(libs.shizuku.api)
     implementation(libs.shizuku.provider)
-
-    // ONNX Runtime (PaddleOCR PP-OCRv4)
-    implementation(libs.onnxruntime.android)
-
-    // 端侧 LLM 翻译（llama.cpp + GGUF）。运行时仅在 Build.VERSION.SDK_INT >= 33 启用，
-    // 详见 :llama-android 模块说明与 LlamaEngineHolder。
-    implementation(project(":llama-android"))
 
     // Test
     testImplementation(libs.junit)

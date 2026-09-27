@@ -2,38 +2,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- :llama-android 的 minSdk=33（来自 ggml-org/llama.cpp 上游硬要求）。
-         屏译 :app 的 minSdk=26 不动；端侧 LLM 翻译运行时按 Build.VERSION.SDK_INT >= 33
-         判断可用性，低版本系统下 LOCAL_HUNYUAN_MT / LOCAL_SAKURA 入口在设置里隐藏并禁用。 -->
-    <uses-sdk tools:overrideLibrary="com.arm.aichat" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission
-        android:name="android.permission.PACKAGE_USAGE_STATS"
-        tools:ignore="ProtectedPermissions" />
 
-    <!-- ML Kit 模型自动下载 -->
+    <!-- Shizuku 包可见性 -->
     <queries>
-        <package android:name="com.google.android.gms" />
         <package android:name="moe.shizuku.privileged.api" />
         <package android:name="moe.shizuku.api" />
         <package android:name="kerneldroid.nightzuku" />
         <package android:name="af.shizuku.plus.api" />
-        <intent>
-            <action android:name="android.intent.action.TTS_SERVICE" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.MAIN" />
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent>
     </queries>
 
     <application
@@ -70,16 +53,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND_MULTIPLE" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />
-            </intent-filter>
         </activity>
 
         <!-- Unified user-initiated capture startup and optional system consent. -->
@@ -89,28 +62,6 @@
             android:theme="@style/Theme.GameOcr.Transparent"
             android:taskAffinity=""
             android:excludeFromRecents="true" />
-
-        <activity
-            android:name=".download.ModelDownloadCancelActivity"
-            android:exported="false"
-            android:theme="@style/Theme.GameOcr.Transparent"
-            android:taskAffinity=""
-            android:excludeFromRecents="true" />
-
-        <!-- 区域选择 Activity：全屏拉框 -->
-        <activity
-            android:name=".capture.RegionPickerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.GameOcr.Transparent"
-            android:excludeFromRecents="true"
-            android:noHistory="true" />
-
-        <activity
-            android:name=".capture.GameRegionPickerActivity"
-            android:exported="false"
-            android:theme="@style/Theme.GameOcr.Transparent"
-            android:excludeFromRecents="true"
-            android:noHistory="true" />
 
         <service
             android:name=".service.CaptureQuickSettingsTileService"
@@ -126,23 +77,6 @@
                 android:value="true" />
         </service>
 
-        <!-- 系统「文字选中」菜单入口：用户在任意 App 长按文字选词，系统菜单会列出本项。
-             无 UI，立即 finish；翻译走 application scope；结果浮卡显示在原 App 上层。 -->
-        <activity
-            android:name=".translate.ProcessTextTranslateActivity"
-            android:exported="true"
-            android:label="@string/process_text_label"
-            android:icon="@drawable/ic_menu_word_select"
-            android:theme="@style/Theme.GameOcr.Transparent"
-            android:excludeFromRecents="true"
-            android:noHistory="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PROCESS_TEXT" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
-        </activity>
-
         <!-- 截屏前台服务：mediaProjection 用于投屏授权；specialUse 用于 Shizuku / 无障碍路径 -->
         <!-- configChanges 必须包含 orientation+screenSize+screenLayout+smallestScreenSize：
              旋转屏幕时由 Service 自己接 onConfigurationChanged，按比例重算悬浮窗位置 +
@@ -154,13 +88,8 @@
             android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="On-demand screen capture via Shizuku or an enabled accessibility service for OCR translation" />
+                android:value="On-demand screen capture via Shizuku or an enabled accessibility service for card game assistance" />
         </service>
-
-        <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge" />
 
         <!-- Shizuku provider：用于让 Shizuku 服务把 IBinder 绑过来 -->
         <provider
@@ -181,7 +110,7 @@
                 android:resource="@xml/log_file_paths" />
         </provider>
 
-        <!-- 可选无障碍服务：音量键触发器 + 用户主动执行的输入翻译。 -->
+        <!-- 可选无障碍服务：截屏后端之一 + 音量键触发分析。 -->
         <service
             android:name=".trigger.GameOcrAccessibilityService"
             android:exported="false"
@@ -194,11 +123,6 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/a11y_config" />
         </service>
-
-        <!-- ML Kit 端侧模型自动下载 -->
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr,ocr_japanese,ocr_chinese" />
 
         <!-- MIUI / HyperOS 特殊配置：允许 overlay window 在横屏延伸到 long-edge cutout
              区域，否则系统默认 letterbox 让 window 不能覆盖 cutout，左边露物理屏黑条。
