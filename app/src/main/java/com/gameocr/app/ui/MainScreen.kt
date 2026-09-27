@@ -1,5 +1,6 @@
 package com.gameocr.app.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
@@ -95,6 +98,58 @@ fun MainScreen(
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null)
                     Text("  启动悬浮球")
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text("牌局模式", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "不同模式用不同的提示词看牌、出主意；切换后点悬浮球即按新模式分析。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    viewModel.gameModules.forEach { module ->
+                        val selected = settings.gameModuleId == module.id
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.update { s -> s.copy(gameModuleId = module.id) } }
+                                .padding(vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(
+                                selected = selected,
+                                onClick = { viewModel.update { s -> s.copy(gameModuleId = module.id) } },
+                            )
+                            Column(modifier = Modifier.padding(start = 8.dp)) {
+                                Text(
+                                    text = module.displayName,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                )
+                                val summaryFirstLine = module.promptPolicy.rulesSummary
+                                    .lineSequence()
+                                    .map { it.trim() }
+                                    .firstOrNull { it.isNotEmpty() }
+                                if (!summaryFirstLine.isNullOrEmpty()) {
+                                    Text(
+                                        text = summaryFirstLine,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 2,
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -185,10 +240,11 @@ fun MainScreen(
                 ) {
                     Text("使用说明", style = MaterialTheme.typography.titleMedium)
                     listOf(
-                        "1. 点「启动悬浮球」，按提示授予悬浮窗 / 截屏权限。",
-                        "2. 打开跑胡子牌局，点一下悬浮球即分析当前牌面。",
-                        "3. 悬浮卡展示 VLM 识别的牌局与 AI 建议，可核对后自行决策。",
-                        "4. 换一局时点悬浮卡上的「新开一局」，清空上局记忆。",
+                        "1. 先在上面选好牌局模式（跑胡子 / 斗地主），再点「启动悬浮球」。",
+                        "2. 按提示授予悬浮窗 / 截屏权限。",
+                        "3. 打开对应牌局，点一下悬浮球即分析当前牌面。",
+                        "4. 悬浮卡展示 VLM 识别的牌局与 AI 建议，可核对后自行决策。",
+                        "5. 换一局时点悬浮卡上的「新开一局」，清空上局记忆。",
                     ).forEach { line ->
                         Text(
                             line,

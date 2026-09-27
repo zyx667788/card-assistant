@@ -10,7 +10,7 @@ import com.gameocr.app.game.core.BoardRecognizer
 import com.gameocr.app.game.core.GameModule
 import com.gameocr.app.game.core.GameModuleRegistry
 import com.gameocr.app.game.core.GameState
-import com.gameocr.app.game.paohuzi.VlmRecognitionException
+import com.gameocr.app.game.core.VlmRecognitionException
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
