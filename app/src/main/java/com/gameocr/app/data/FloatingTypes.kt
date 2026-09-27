@@ -60,3 +60,7 @@ object FloatingMenu {
         MenuItemId.HOME,
     )
 }
+
+/** Keep the floating ball visible even with malformed imported settings. */
+internal fun normalizedFloatingButtonAlpha(value: Float): Float =
+    if (value.isFinite()) value.coerceIn(0.1f, 1f) else 1f

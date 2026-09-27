@@ -435,7 +435,7 @@ class CaptureService : Service() {
         settingsCollectJob?.cancel()
         settingsCollectJob = null
         hintOverlay?.clear()
-        overlay = null
+        hintOverlay = null
         floatingButton?.hide()
         floatingButton = null
         screenshotter?.release()

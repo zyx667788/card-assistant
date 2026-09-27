@@ -56,6 +56,11 @@ class SettingsRepository internal constructor(
         val FloatingButtonSnapToEdge = booleanPreferencesKey("floating_button_snap_to_edge")
         val FloatingButtonAutoDock = booleanPreferencesKey("floating_button_auto_dock")
         val FloatingButtonDockInsetDp = intPreferencesKey("floating_button_dock_inset_dp")
+        val FloatingWindowX = intPreferencesKey("floating_window_x")
+        val FloatingWindowY = intPreferencesKey("floating_window_y")
+        val FloatingWindowWidthDp = intPreferencesKey("floating_window_width_dp")
+        val FloatingWindowHeightDp = intPreferencesKey("floating_window_height_dp")
+        val FloatingWindowLocked = booleanPreferencesKey("floating_window_locked")
         val OverlayTextSizeSp = intPreferencesKey("overlay_text_size_sp")
         val OverlayAlpha = floatPreferencesKey("overlay_alpha")
         val OverlayTheme = stringPreferencesKey("overlay_theme")
@@ -121,6 +126,11 @@ class SettingsRepository internal constructor(
         this[Keys.FloatingButtonSnapToEdge] = s.floatingButtonSnapToEdge
         this[Keys.FloatingButtonAutoDock] = s.floatingButtonAutoDock
         this[Keys.FloatingButtonDockInsetDp] = s.floatingButtonDockInsetDp
+        this[Keys.FloatingWindowX] = s.floatingWindowX
+        this[Keys.FloatingWindowY] = s.floatingWindowY
+        this[Keys.FloatingWindowWidthDp] = s.floatingWindowWidthDp
+        this[Keys.FloatingWindowHeightDp] = s.floatingWindowHeightDp
+        this[Keys.FloatingWindowLocked] = s.floatingWindowLocked
         this[Keys.OverlayTextSizeSp] = s.overlayTextSizeSp
         this[Keys.OverlayAlpha] = s.overlayAlpha
         this[Keys.OverlayTheme] = s.overlayTheme.name
@@ -161,6 +171,11 @@ class SettingsRepository internal constructor(
             floatingButtonSnapToEdge = this[Keys.FloatingButtonSnapToEdge] ?: d.floatingButtonSnapToEdge,
             floatingButtonAutoDock = this[Keys.FloatingButtonAutoDock] ?: d.floatingButtonAutoDock,
             floatingButtonDockInsetDp = this[Keys.FloatingButtonDockInsetDp] ?: d.floatingButtonDockInsetDp,
+            floatingWindowX = this[Keys.FloatingWindowX] ?: d.floatingWindowX,
+            floatingWindowY = this[Keys.FloatingWindowY] ?: d.floatingWindowY,
+            floatingWindowWidthDp = this[Keys.FloatingWindowWidthDp] ?: d.floatingWindowWidthDp,
+            floatingWindowHeightDp = this[Keys.FloatingWindowHeightDp] ?: d.floatingWindowHeightDp,
+            floatingWindowLocked = this[Keys.FloatingWindowLocked] ?: d.floatingWindowLocked,
             overlayTextSizeSp = this[Keys.OverlayTextSizeSp] ?: d.overlayTextSizeSp,
             overlayAlpha = this[Keys.OverlayAlpha] ?: d.overlayAlpha,
             overlayTheme = this[Keys.OverlayTheme]?.let {

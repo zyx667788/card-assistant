@@ -15,7 +15,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
 import com.gameocr.app.ui.MainActivity
-import com.gameocr.app.data.SettingsRepository
 import com.gameocr.app.ui.openOverlayPermissionSettings
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -97,7 +96,6 @@ enum class CaptureStartStage { WAITING, PROJECTION, OVERLAY_PERMISSION, SETUP, F
 class CaptureStartViewModel @Inject constructor(
     private val coordinator: CaptureStartCoordinator,
     private val savedState: SavedStateHandle,
-    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
     private val ownsGate = coordinator.gate.acquire()
     private val currentStage = MutableStateFlow(CaptureStartStage.WAITING)
@@ -141,12 +139,7 @@ class CaptureStartViewModel @Inject constructor(
         return true
     }
 
-    suspend fun shouldShareEntireScreen(): Boolean {
-        val settings = settingsRepository.get()
-        return shouldRequestEntireScreen(
-            Build.VERSION.SDK_INT, settings.developerOptionsEnabled, settings.shareEntireScreen,
-        )
-    }
+    fun shouldShareEntireScreen(): Boolean = Build.VERSION.SDK_INT >= 34
 
     fun projectionGranted(code: Int, data: Intent) {
         try {

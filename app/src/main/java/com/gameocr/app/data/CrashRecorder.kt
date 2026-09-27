@@ -49,7 +49,14 @@ object CrashRecorder {
      * 把 [com.gameocr.app.data.Settings] 转成多行 key=value 字符串。**敏感字段**（API key /
      * Secret / base URL / prompt 全文）替换为 `<set>` / `<unset>` 或截断，避免泄露给反馈接收方。
      */
-    fun formatSettings(s: Settings): String = SettingsFieldPolicy.formatDiagnostics(s)
+    fun formatSettings(s: Settings): String = buildString {
+        appendLine("apiKey=<${if (s.apiKey.isNotBlank()) "set" else "unset"}>")
+        appendLine("baseUrl=<${if (s.baseUrl.isNotBlank()) "set" else "unset"}>")
+        appendLine("model=${s.model}")
+        appendLine("apiTimeoutSeconds=${s.apiTimeoutSeconds}")
+        appendLine("gameModuleId=${s.gameModuleId}")
+        appendLine("floatingButtonSizeDp=${s.floatingButtonSizeDp}")
+    }
     /** 设备 + 屏幕信息（不会变，理论上 install 时算一次就够，简化成每次写文件时取）。 */
     private fun formatEnvironment(context: Context): String = buildString {
         val dm = context.resources.displayMetrics

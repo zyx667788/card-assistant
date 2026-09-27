@@ -28,6 +28,13 @@ data class Settings(
     val floatingButtonAutoDock: Boolean = false,
     val floatingButtonDockInsetDp: Int = 0,
 
+    // 建议悬浮卡窗口几何（拖动/缩放后持久化）。
+    val floatingWindowX: Int = -1,
+    val floatingWindowY: Int = -1,
+    val floatingWindowWidthDp: Int = 320,
+    val floatingWindowHeightDp: Int = 180,
+    val floatingWindowLocked: Boolean = false,
+
     // 悬浮卡外观。
     val overlayTextSizeSp: Int = 14,
     val overlayAlpha: Float = 0.85f,

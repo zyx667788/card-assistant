@@ -116,8 +116,6 @@ class DraggableOverlayWindow(
     private var layoutParams: WindowManager.LayoutParams? = null
     private var contentSlot: FrameLayout? = null
     private var transientLayer: FrameLayout? = null
-    private var wordPreviewView: View? = null
-    private var wordPreviewDismissAction: (() -> Unit)? = null
     private var activeSelectionActionMode: ActionMode? = null
     private val selectableTextViews: MutableMap<TextView, () -> Boolean> = WeakHashMap()
     /** show / 旋转后缓存的屏幕尺寸——给 onConfigurationChanged 做 ratio 重算的基准。
@@ -133,7 +131,7 @@ class DraggableOverlayWindow(
     fun isShown(): Boolean = rootView != null
 
     internal fun observationExclusionRects(): List<Rect> =
-        listOfNotNull(rootView?.observationBounds(), wordPreviewView?.observationBounds())
+        listOfNotNull(rootView?.observationBounds())
 
     /**
      * 循环截图时临时停止绘制窗口，但保留同一个 window、内容和几何状态。
@@ -259,7 +257,6 @@ class DraggableOverlayWindow(
     fun setContent(content: View) {
         val slot = contentSlot ?: return
         endActiveSelection()
-        dismissWordPreview()
         slot.removeAllViews()
         slot.addView(
             content,
@@ -270,78 +267,6 @@ class DraggableOverlayWindow(
         )
         applyLocked()
     }
-
-    /** Shows the compact three-line dictionary preview inside the existing floating window. */
-    internal fun showWordPreview(
-        anchorInWindow: Rect,
-        content: FloatingWordPreviewContent,
-        onSpeak: (() -> Unit)?,
-        onOpenDetails: (() -> Unit)?,
-        textSizeSp: Float,
-        textStyle: OverlayTextStyle,
-        typeface: Typeface?,
-        accentColor: Int,
-        onPreviewDismissed: () -> Unit,
-    ) {
-        val layer = transientLayer ?: return
-        removeWordPreview(notifyDismissed = false)
-        val density = context.resources.displayMetrics.density
-        val horizontalMargin = (10 * density).roundToInt()
-        val verticalGap = (6 * density).roundToInt()
-        val openDetails = onOpenDetails?.let { action ->
-            {
-                dismissWordPreview()
-                action()
-            }
-        }
-        val card = buildWordPreviewCard(
-            content = content,
-            onSpeak = onSpeak,
-            onOpenDetails = openDetails,
-            textSizeSp = textSizeSp,
-            textStyle = textStyle,
-            typeface = typeface,
-            accentColor = accentColor,
-        )
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT,
-        ).apply {
-            leftMargin = horizontalMargin
-            rightMargin = horizontalMargin
-        }
-        layer.addView(card, params)
-        wordPreviewView = card
-        wordPreviewDismissAction = onPreviewDismissed
-        card.post {
-            if (wordPreviewView !== card || layer.width <= 0 || layer.height <= 0) return@post
-            val layerLocation = IntArray(2)
-            layer.getLocationInWindow(layerLocation)
-            val anchorTop = anchorInWindow.top - layerLocation[1]
-            val anchorBottom = anchorInWindow.bottom - layerLocation[1]
-            val minimumTop = (8 * density).roundToInt()
-            val maximumTop = (layer.height - card.height - minimumTop).coerceAtLeast(minimumTop)
-            val above = anchorTop - card.height - verticalGap
-            val below = anchorBottom + verticalGap
-            params.topMargin = (if (above >= minimumTop) above else below)
-                .coerceIn(minimumTop, maximumTop)
-            card.layoutParams = params
-        }
-    }
-
-    fun dismissWordPreview() {
-        removeWordPreview(notifyDismissed = true)
-    }
-
-    private fun removeWordPreview(notifyDismissed: Boolean) {
-        val preview = wordPreviewView
-        val dismissAction = wordPreviewDismissAction
-        wordPreviewView = null
-        wordPreviewDismissAction = null
-        (preview?.parent as? FrameLayout)?.removeView(preview)
-        if (notifyDismissed) dismissAction?.invoke()
-    }
-
     /**
      * Makes this text selectable inside the current floating window and extends the platform
      * selection toolbar with the app's selected-text speech action when TTS is enabled.
@@ -361,10 +286,7 @@ class DraggableOverlayWindow(
                 if (locked || !isContentSelectable()) return false
                 activeSelectionActionMode = mode
                 setSelectionWindowFocusable(
-                    floatingWindowNeedsKeyFocus(
-                        locked = locked,
-                        selectionActive = true,
-                    ),
+                    !locked,
                 )
                 menu.add(Menu.NONE, R.id.action_speak_selected_text, 100, speechLabel).apply {
                     setIcon(R.drawable.ic_volume_up)
@@ -514,7 +436,6 @@ class DraggableOverlayWindow(
     fun hide() {
         if (rootView == null && dialog == null) return
         endActiveSelection()
-        dismissWordPreview()
         val currentDialog = dialog
         dialog = null
         runCatching { currentDialog?.dismiss() }
@@ -706,138 +627,6 @@ class DraggableOverlayWindow(
         return root
     }
 
-    private fun buildWordPreviewCard(
-        content: FloatingWordPreviewContent,
-        onSpeak: (() -> Unit)?,
-        onOpenDetails: (() -> Unit)?,
-        textSizeSp: Float,
-        textStyle: OverlayTextStyle,
-        typeface: Typeface?,
-        accentColor: Int,
-    ): View {
-        val density = context.resources.displayMetrics.density
-        val horizontalPadding = (12 * density).roundToInt()
-        val verticalPadding = (8 * density).roundToInt()
-        val foreground = themeFgColor()
-        val muted = themeFgMutedColor()
-        val stroke = themeStroke().takeIf { it.first > 0 }?.second ?: muted
-        val baseTextSizeSp = textSizeSp.coerceIn(10f, 32f)
-
-        fun oneLineText(
-            value: String,
-            sizeSp: Float,
-            color: Int,
-            style: OverlayTextStyle = textStyle,
-        ) = StyledTranslationTextView(context).apply {
-            text = value
-            setTextColor(color)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, sizeSp)
-            applyOverlayTextStyle(style, typeface)
-            maxLines = 1
-            minLines = 1
-            ellipsize = TextUtils.TruncateAt.END
-            setHorizontallyScrolling(false)
-        }
-
-        val card = LinearLayout(context).apply {
-            orientation = LinearLayout.VERTICAL
-            elevation = 8 * density
-            setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
-            background = GradientDrawable().apply {
-                cornerRadius = 10 * density
-                setColor(themeBgColor())
-                setStroke((1 * density).roundToInt().coerceAtLeast(1), stroke)
-            }
-            if (onOpenDetails != null) {
-                isClickable = true
-                isFocusable = true
-                contentDescription = context.getString(
-                    R.string.floating_word_open_details,
-                    content.word,
-                )
-                setOnClickListener { onOpenDetails() }
-            }
-        }
-
-        val wordRow = LinearLayout(context).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-        }
-        wordRow.addView(
-            oneLineText(
-                value = content.word,
-                sizeSp = baseTextSizeSp + 1f,
-                color = foreground,
-                style = textStyle.copy(bold = true),
-            ),
-            LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f),
-        )
-        onSpeak?.let { speak ->
-            val metrics = translationCardSpeechButtonMetrics(density)
-            wordRow.addView(
-                ImageView(context).apply {
-                    setImageResource(R.drawable.ic_volume_up)
-                    imageTintList = android.content.res.ColorStateList.valueOf(accentColor)
-                    setPadding(
-                        metrics.paddingPx,
-                        metrics.paddingPx,
-                        metrics.paddingPx,
-                        metrics.paddingPx,
-                    )
-                    applyBorderlessSelectableBackground()
-                    isClickable = true
-                    isFocusable = true
-                    contentDescription = context.getString(R.string.word_card_speak_source)
-                    setOnClickListener { speak() }
-                },
-                LinearLayout.LayoutParams(metrics.sizePx, metrics.sizePx),
-            )
-        }
-        card.addView(wordRow)
-        content.lines.forEachIndexed { index, line ->
-            card.addView(
-                oneLineText(
-                    line,
-                    if (index == 0) baseTextSizeSp else (baseTextSizeSp - 1f).coerceAtLeast(10f),
-                    foreground,
-                )
-            )
-        }
-        onOpenDetails?.let { openDetails ->
-            card.addView(
-                TextView(context).apply {
-                    text = context.getString(R.string.floating_word_view_details)
-                    setTextColor(accentColor)
-                    setTextSize(
-                        TypedValue.COMPLEX_UNIT_SP,
-                        (baseTextSizeSp - 1f).coerceAtLeast(11f),
-                    )
-                    maxLines = 1
-                    ellipsize = TextUtils.TruncateAt.END
-                    gravity = Gravity.CENTER
-                    val horizontal = (10 * density).roundToInt()
-                    val vertical = (5 * density).roundToInt()
-                    setPadding(horizontal, vertical, horizontal, vertical)
-                    applyBorderlessSelectableBackground()
-                    isClickable = true
-                    isFocusable = true
-                    contentDescription = context.getString(
-                        R.string.floating_word_open_details,
-                        content.word,
-                    )
-                    setOnClickListener { openDetails() }
-                },
-                LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                ).apply {
-                    gravity = Gravity.END
-                    topMargin = (2 * density).roundToInt()
-                },
-            )
-        }
-        return card
-    }
 
     private fun View.applyBorderlessSelectableBackground() {
         val backgroundValue = TypedValue()
@@ -874,12 +663,7 @@ class DraggableOverlayWindow(
      *  锁按钮换实心锁；解锁时全部恢复 + 锁按钮换开锁图标。 */
     private fun applyLocked() {
         if (locked) endActiveSelection()
-        setSelectionWindowFocusable(
-            floatingWindowNeedsKeyFocus(
-                locked = locked,
-                selectionActive = activeSelectionActionMode != null,
-            ),
-        )
+        setSelectionWindowFocusable(!locked && activeSelectionActionMode != null)
         refreshSelectableTextViews()
         val vis = if (locked) View.GONE else View.VISIBLE
         headerView?.visibility = vis

@@ -6,7 +6,6 @@ import androidx.work.Configuration
 import com.gameocr.app.data.CrashRecorder
 import com.gameocr.app.data.LogRepository
 import com.gameocr.app.data.SettingsRepository
-import com.gameocr.app.di.PrivateCleartextInterceptor
 import com.gameocr.app.network.ScreenWakeNetworkRecovery
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -22,7 +21,6 @@ class GameOcrApp : Application(), Configuration.Provider {
 
     @Inject lateinit var logRepository: LogRepository
     @Inject lateinit var settingsRepository: SettingsRepository
-    @Inject lateinit var cleartextInterceptor: PrivateCleartextInterceptor
     @Inject lateinit var screenWakeNetworkRecovery: ScreenWakeNetworkRecovery
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
@@ -63,31 +61,8 @@ class GameOcrApp : Application(), Configuration.Provider {
                     }
                 }
                 .onFailure { Timber.w(it, "Failed to migrate legacy settings secrets") }
-            runCatching { settingsRepository.migrateTextOrientationAutoDetectDefaultOnIfNeeded() }
-                .onSuccess { changed ->
-                    if (changed) {
-                        Timber.i("Enabled text orientation auto-detect for bundled orientation model default")
-                    }
-                }
-                .onFailure { Timber.w(it, "Failed to migrate text orientation auto-detect default") }
-            runCatching { settingsRepository.migrateRetiredMangaOcrAdvancedSettingsIfNeeded() }
-                .onSuccess { changed ->
-                    if (changed) {
-                        Timber.i("Reset retired Manga OCR advanced settings to zero")
-                    }
-                }
-                .onFailure { Timber.w(it, "Failed to reset retired Manga OCR advanced settings") }
-            runCatching { settingsRepository.migrateMangaOcrDetectorToV6SmallIfNeeded() }
-                .onSuccess { changed ->
-                    if (changed) {
-                        Timber.i("Migrated Manga OCR detector to PP-OCRv6 Small")
-                    }
-                }
-                .onFailure { Timber.w(it, "Failed to migrate Manga OCR detector") }
             settingsRepository.settings.collect { settings ->
-                logRepository.configureVerbose(settings.developerOptionsEnabled)
                 CrashRecorder.updateSettingsSummary(CrashRecorder.formatSettings(settings))
-                cleartextInterceptor.allowedHosts = settings.cleartextAllowedHosts.toSet()
             }
         }
     }
