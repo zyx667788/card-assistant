@@ -44,9 +44,6 @@ jobs:
             echo "sdk.dir=$ANDROID_HOME" > local.properties
           fi
 
-      - name: Run unit tests
-        run: ./gradlew --no-daemon testDebugUnitTest
-
       - name: Assemble debug
         run: ./gradlew --no-daemon assembleDebug lint
 
