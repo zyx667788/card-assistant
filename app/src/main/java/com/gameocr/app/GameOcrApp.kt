@@ -1,8 +1,6 @@
 package com.gameocr.app
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
-import androidx.work.Configuration
 import com.gameocr.app.data.CrashRecorder
 import com.gameocr.app.data.LogRepository
 import com.gameocr.app.data.SettingsRepository
@@ -17,29 +15,21 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @HiltAndroidApp
-class GameOcrApp : Application(), Configuration.Provider {
+class GameOcrApp : Application() {
 
     @Inject lateinit var logRepository: LogRepository
     @Inject lateinit var settingsRepository: SettingsRepository
     @Inject lateinit var screenWakeNetworkRecovery: ScreenWakeNetworkRecovery
-    @Inject lateinit var workerFactory: HiltWorkerFactory
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
 
     /**
-     * Application-scope 协程容器。Activity / Service 销毁不取消，可承接「Activity 提交任务后立刻 finish」
-     * 这类不依赖宿主生命周期的后台工作（如 后台工作
-     * 在 ACTION_PROCESS_TEXT 回调里跑翻译 → 弹 overlay 卡片）。
+     * Application-scope 协程容器。Activity / Service 销毁不取消，可承接不依赖宿主生命周期的后台工作。
      */
     internal val appScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
         // 仅 debug 包 plant DebugTree。release 包不打 logcat —— 避免线上日志泄漏；
-        // 用户能在 app 内日志页（LogRepository）看到 OCR / 翻译关键信息已经够诊断。
+        // 用户能在 app 内日志页（LogRepository）看到打牌助手关键信息已经够诊断。
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
         }

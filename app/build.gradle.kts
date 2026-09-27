@@ -145,7 +145,6 @@ dependencies {
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.work.runtime.ktx)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
@@ -160,26 +159,21 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
-    implementation(libs.hilt.work)
-    ksp(libs.hilt.work.compiler)
 
     // Network / Serialization
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.okhttp)
-    implementation(libs.okhttp.logging)
     implementation(libs.kotlinx.serialization.json)
 
-    // DataStore / exif
+    // DataStore
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.exifinterface)
 
     // 物理动画：悬浮球松手吸边用 SpringAnimation
     implementation(libs.androidx.dynamicanimation)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.kotlinx.coroutines.play.services)
 
     // Logging
     implementation(libs.timber)
