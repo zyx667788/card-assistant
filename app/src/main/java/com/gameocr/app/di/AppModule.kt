@@ -26,6 +26,8 @@ import com.gameocr.app.translate.MlKitLanguageModelDeleter
 import com.gameocr.app.translate.MlKitTranslationClientFactory
 import com.gameocr.app.tts.RoutingTtsEngine
 import com.gameocr.app.tts.TtsEngine
+import com.gameocr.app.game.session.GameSessionStore
+import com.gameocr.app.game.session.SettingsGameSessionStore
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -132,6 +134,10 @@ abstract class EngineBindings {
     @Binds
     @Singleton
     abstract fun bindOcrEngine(impl: RoutingOcrEngine): OcrEngine
+
+    @Binds
+    @Singleton
+    abstract fun bindGameSessionStore(impl: SettingsGameSessionStore): GameSessionStore
 
     @Binds
     @Singleton

@@ -105,6 +105,13 @@
             android:excludeFromRecents="true"
             android:noHistory="true" />
 
+        <activity
+            android:name=".capture.GameRegionPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GameOcr.Transparent"
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
+
         <service
             android:name=".service.CaptureQuickSettingsTileService"
             android:exported="true"

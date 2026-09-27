@@ -1,6 +1,18 @@
 Screen Translator (屏译)
 Copyright 2026 ciddwd
 
+Modifications in this fork
+==========================
+
+This repository is a modified fork of Screen Translator. The fork keeps the
+original screen-capture, OCR, overlay-window and model-invocation
+infrastructure, and adds a card-game assistant domain on top of it:
+a pluggable game-module framework, a Paohuzi (字牌) rules engine, on-screen
+board recognition from OCR text, and an advice engine that reuses the
+existing OpenAI-compatible configuration. The added and modified files are
+documented in docs/game-assistant/. Files added by this fork remain under
+the Apache License, Version 2.0.
+
 Project license
 ===============
 
@@ -16,7 +28,7 @@ Third-party runtime software
 
 The Android release runtime dependency graph and the native code built into the
 application include the principal projects below. Version numbers refer to the
-v0.4.6 build configuration. Transitive modules belonging to the same project
+v0.4.7 build configuration. Transitive modules belonging to the same project
 family are grouped together.
 
 Apache License 2.0

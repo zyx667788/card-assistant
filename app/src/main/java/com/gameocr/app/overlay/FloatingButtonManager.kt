@@ -76,6 +76,7 @@ class FloatingButtonManager(
     @Volatile var initialY: Int = -1
     /** 菜单第二项「截图区域调整」回调，由 CaptureService 赋值。 */
     @Volatile var onMenuPickRegion: () -> Unit = {}
+    @Volatile var onMenuGameRegion: () -> Unit = {}
     @Volatile var onMenuLanguagePair: () -> Unit = {}
     /** 菜单第三项「返回主应用」回调，由 CaptureService 赋值。 */
     @Volatile var onMenuOpenMainActivity: () -> Unit = {}
@@ -759,6 +760,7 @@ class FloatingButtonManager(
         FloatingSkill.WORD_SELECT -> R.drawable.ic_overlay_button_word
         FloatingSkill.LOOP -> R.drawable.ic_overlay_button_loop
         FloatingSkill.INPUT_TRANSLATE -> R.drawable.ic_overlay_button_input_translate
+        FloatingSkill.GAME_ASSISTANT -> R.drawable.ic_overlay_button
     }
 
     private fun updateAccessibilityDescription() {
@@ -771,6 +773,8 @@ class FloatingButtonManager(
             )
             FloatingSkill.INPUT_TRANSLATE ->
                 context.getString(R.string.a11y_floating_mode_input_translate)
+            FloatingSkill.GAME_ASSISTANT ->
+                context.getString(R.string.a11y_floating_mode_game_assistant)
         }
         val hint = when (skill) {
             FloatingSkill.FULL_SCREEN -> context.getString(R.string.a11y_floating_hint_full_screen)
@@ -781,6 +785,8 @@ class FloatingButtonManager(
             )
             FloatingSkill.INPUT_TRANSLATE ->
                 context.getString(R.string.a11y_floating_hint_input_translate)
+            FloatingSkill.GAME_ASSISTANT ->
+                context.getString(R.string.a11y_floating_hint_game_assistant)
         }
         view?.contentDescription = OverlayAccessibilityLabels.actionWithState(
             action = context.getString(R.string.a11y_floating_ball),
@@ -826,6 +832,7 @@ class FloatingButtonManager(
             FloatingSkill.WORD_SELECT -> R.string.floating_skill_word_select_label
             FloatingSkill.LOOP -> R.string.menu_loop_translate
             FloatingSkill.INPUT_TRANSLATE -> R.string.menu_input_translate
+            FloatingSkill.GAME_ASSISTANT -> R.string.floating_skill_game_assistant_label
         }
     )
 
@@ -1298,6 +1305,11 @@ class FloatingButtonManager(
                     dismissArcMenu()
                     onSwitchSkill(FloatingSkill.INPUT_TRANSLATE)
                 },
+                onSwitchToGameAssistant = {
+                    dismissArcMenu()
+                    onSwitchSkill(FloatingSkill.GAME_ASSISTANT)
+                },
+                onGameRegion = { dismissArcMenu(); onMenuGameRegion() },
             )
         )
         val pages = MenuItemRegistry.paginate(allItems, pageSize = arcMenuPageSize) { nextIdx ->

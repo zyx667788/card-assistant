@@ -82,7 +82,8 @@ internal fun resolveFloatingWindowLockSync(
 class DraggableOverlayWindow(
     private val context: Context,
     private val settingsRepository: SettingsRepository,
-    private val ioScope: CoroutineScope
+    private val ioScope: CoroutineScope,
+    private val persistSharedSettings: Boolean = true,
 ) {
     /** 锁定后禁用拖拽 / resize（按钮关闭仍可用）。 */
     @Volatile var locked: Boolean = false
@@ -863,6 +864,7 @@ class DraggableOverlayWindow(
         pendingLockedState = newLocked
         locked = newLocked
         applyLocked()
+        if (!persistSharedSettings) return
         ioScope.launch {
             settingsRepository.update { it.copy(floatingWindowLocked = newLocked) }
         }
@@ -967,6 +969,7 @@ class DraggableOverlayWindow(
     }
 
     private fun persistGeometry() {
+        if (!persistSharedSettings) return
         val x = initialX
         val y = initialY
         val w = widthDp

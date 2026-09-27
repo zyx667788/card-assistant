@@ -27,13 +27,16 @@ object MenuItemRegistry {
             FloatingSkill.WORD_SELECT -> FloatingSkill.FULL_SCREEN
             FloatingSkill.LOOP -> FloatingSkill.WORD_SELECT
             FloatingSkill.INPUT_TRANSLATE -> FloatingSkill.FULL_SCREEN
+            FloatingSkill.GAME_ASSISTANT -> FloatingSkill.FULL_SCREEN
         }
         MenuItemId.INPUT_TRANSLATE_SKILL -> when (currentSkill) {
             FloatingSkill.INPUT_TRANSLATE -> FloatingSkill.WORD_SELECT
             FloatingSkill.FULL_SCREEN,
             FloatingSkill.WORD_SELECT,
             FloatingSkill.LOOP -> FloatingSkill.INPUT_TRANSLATE
+            FloatingSkill.GAME_ASSISTANT -> FloatingSkill.INPUT_TRANSLATE
         }
+        MenuItemId.GAME_ASSISTANT_SKILL -> FloatingSkill.GAME_ASSISTANT
         else -> null
     }
 
@@ -58,11 +61,23 @@ object MenuItemRegistry {
                     callbacks = callbacks,
                 )
             )
+            MenuItemId.GAME_ASSISTANT_SKILL -> listOf(MenuItem(
+                iconRes = R.drawable.ic_menu_full_screen,
+                bgRes = R.drawable.bg_arc_menu_item,
+                labelRes = R.string.menu_game_assistant,
+                onTap = callbacks.onSwitchToGameAssistant,
+            ))
             MenuItemId.REGION -> listOf(MenuItem(
                 iconRes = R.drawable.ic_menu_region,
                 bgRes = R.drawable.bg_arc_menu_item,
                 labelRes = R.string.menu_pick_region,
                 onTap = callbacks.onRegion
+            ))
+            MenuItemId.GAME_REGION -> listOf(MenuItem(
+                iconRes = R.drawable.ic_menu_region,
+                bgRes = R.drawable.bg_arc_menu_item,
+                labelRes = R.string.menu_game_region,
+                onTap = callbacks.onGameRegion,
             ))
             MenuItemId.LANGUAGE_PAIR -> listOf(MenuItem(
                 iconRes = R.drawable.ic_menu_language_pair,
@@ -119,6 +134,12 @@ object MenuItemRegistry {
             labelRes = R.string.menu_input_translate,
             onTap = callbacks.onSwitchToInputTranslate,
         )
+        FloatingSkill.GAME_ASSISTANT -> MenuItem(
+            iconRes = R.drawable.ic_menu_full_screen,
+            bgRes = R.drawable.bg_arc_menu_item,
+            labelRes = R.string.menu_game_assistant,
+            onTap = callbacks.onSwitchToGameAssistant,
+        )
     }
 
     /**
@@ -158,5 +179,7 @@ object MenuItemRegistry {
         val onSwitchToFullScreen: () -> Unit,
         val onSwitchToWordSelect: () -> Unit,
         val onSwitchToInputTranslate: () -> Unit,
+        val onSwitchToGameAssistant: () -> Unit,
+        val onGameRegion: () -> Unit,
     )
 }

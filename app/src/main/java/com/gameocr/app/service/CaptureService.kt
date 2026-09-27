@@ -23,6 +23,10 @@ import android.widget.Toast
 import androidx.core.app.ServiceCompat
 import com.gameocr.app.R
 import com.gameocr.app.capture.CaptureCoordinateRelation
+import com.gameocr.app.game.session.GameSessionManager
+import com.gameocr.app.game.session.GameTurnCoordinator
+import com.gameocr.app.game.ui.GameAdviceOverlay
+import com.gameocr.app.capture.GameRegionPickerActivity
 import com.gameocr.app.capture.CaptureContentOrientationPolicy
 import com.gameocr.app.capture.CaptureRegion
 import com.gameocr.app.capture.captureRegionOrigin
@@ -294,6 +298,8 @@ class CaptureService : Service() {
     @Inject lateinit var translationGlossaryRepository: TranslationGlossaryRepository
     @Inject lateinit var sourcePreservationService: SourcePreservationService
     @Inject lateinit var offlineDictionaryRepository: OfflineDictionaryRepository
+    @Inject lateinit var gameTurnCoordinator: GameTurnCoordinator
+    @Inject lateinit var gameSessionManager: GameSessionManager
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
@@ -313,6 +319,8 @@ class CaptureService : Service() {
     private var captureProbeJob: Job? = null
     private var projection: MediaProjection? = null
     private var floatingButton: FloatingButtonManager? = null
+    private var gameAdviceOverlay: GameAdviceOverlay? = null
+    private var gameAdviceJob: Job? = null
     private var overlay: OverlayManager? = null
     private var captureRegionBorder: CaptureRegionBorderOverlay? = null
     private var regionPicker: RegionPickerOverlay? = null
@@ -499,6 +507,7 @@ class CaptureService : Service() {
             onFloatingWordLookupRequested = ::lookupFloatingEnglishWord,
             onFloatingWordDetailsRequested = ::showFloatingEnglishWordDetails,
         )
+        gameAdviceOverlay = GameAdviceOverlay(this, settingsRepository, scope)
         captureRegionBorder = CaptureRegionBorderOverlay(this) { region, screenWidth, screenHeight ->
             scope.launch {
                 settingsRepository.setCaptureRegion(region, screenWidth, screenHeight)
@@ -514,6 +523,7 @@ class CaptureService : Service() {
                     FloatingSkill.WORD_SELECT -> triggerWordSelect()
                     FloatingSkill.LOOP -> toggleLoopMode()
                     FloatingSkill.INPUT_TRANSLATE -> triggerInputTranslation()
+                    FloatingSkill.GAME_ASSISTANT -> triggerGameAdviceAnalysis()
                 }
             },
             onDoubleTap = {
@@ -540,6 +550,9 @@ class CaptureService : Service() {
             // 截图区域调整：用悬浮窗版替代旧的 Activity 跳转——不再切走游戏 / 漫画，且重复
             // 点菜单也只弹一次（show 内部去重）。
             it.onMenuPickRegion = { showRegionPickerOverlay() }
+            it.onMenuGameRegion = {
+                startActivity(GameRegionPickerActivity.newIntent(this, null))
+            }
             it.onMenuLanguagePair = { showLanguageQuickSwitchOverlay() }
             it.onMenuPresetSwitch = { showPresetQuickSwitchOverlay() }
             it.onMenuOpenSettings = {
@@ -703,6 +716,7 @@ class CaptureService : Service() {
             overlay?.clearForCapture(preserveFloatingWindow = true)
             translationCard?.dismiss()
             translationBlockCopyOverlay?.dismiss()
+            gameAdviceOverlay?.dismiss()
             captureRegionBorder?.setHiddenForCapture(hidden = true)
             if (hideFloatingButton) floatingButton?.hide()
         }.join()
@@ -773,6 +787,59 @@ class CaptureService : Service() {
                 }
             }
             false
+        }
+    }
+
+    /** 单击打牌助手：截一帧，跑 OCR + 牌局解析 + LLM 决策，最后显示可核对悬浮卡。 */
+    private fun triggerGameAdviceAnalysis() {
+        if (gameAdviceJob?.isActive == true) return
+        if (!captureLock.tryLock()) {
+            mainScope.launch { overlay?.showErrorHint("正在处理上一帧，请稍候", 2500L) }
+            return
+        }
+        gameAdviceJob = scope.launch {
+            var bitmap: Bitmap? = null
+            try {
+                mainScope.async { overlay?.showLoadingHint() }.await()
+                prepareCleanCaptureFrame(hideFloatingButton = true)
+                val shotter = screenshotter
+                bitmap = if (shotter == null) null else screenshotLock.withLock { shotter.capture() }
+                restoreCaptureChrome(showLoading = true, restoreFloatingButton = true)
+                if (bitmap == null) {
+                    withContext(Dispatchers.Main) {
+                        overlay?.dismissLoading()
+                        overlay?.showErrorHint("截图失败，请确认截屏服务仍在运行")
+                    }
+                    return@launch
+                }
+                val settings = settingsRepository.get()
+                val outcome = gameTurnCoordinator.analyze(bitmap, settings)
+                withContext(Dispatchers.Main) {
+                    overlay?.dismissLoading()
+                    gameAdviceOverlay?.show(
+                        outcome = outcome,
+                        onRerun = { triggerGameAdviceAnalysis() },
+                        onNewGame = {
+                            gameAdviceJob = scope.launch {
+                                gameSessionManager.reset(settings.gameModuleId)
+                                withContext(Dispatchers.Main) {
+                                    overlay?.showInfoHint(getString(R.string.game_session_reset))
+                                }
+                            }
+                        },
+                    )
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                withContext(Dispatchers.Main) {
+                    overlay?.dismissLoading()
+                    overlay?.showErrorHint(shortError(error), durationMs = 6000L)
+                }
+            } finally {
+                bitmap?.let { if (!it.isRecycled) it.recycle() }
+                captureLock.unlock()
+            }
         }
     }
 
@@ -1476,6 +1543,7 @@ class CaptureService : Service() {
             FloatingSkill.WORD_SELECT -> R.string.toast_skill_switched_word_select
             FloatingSkill.LOOP -> R.string.toast_skill_switched_loop
             FloatingSkill.INPUT_TRANSLATE -> R.string.toast_skill_switched_input_translate
+            FloatingSkill.GAME_ASSISTANT -> R.string.toast_skill_switched_game_assistant
         }
         mainScope.launch {
             overlay?.showInfoHint(getString(msgRes))
@@ -5450,6 +5518,10 @@ class CaptureService : Service() {
         captureProbeJob = null
         cancelActiveTranslationBatch("cleanupCapture")
         cancelInputTranslation(silent = true)
+        gameAdviceJob?.cancel()
+        gameAdviceJob = null
+        gameAdviceOverlay?.dismiss()
+        gameAdviceOverlay = null
         loopMode = false
         loopJob?.cancel()
         loopJob = null

@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.gameocr.app.R
+import com.gameocr.app.game.core.BoardZone
 import com.gameocr.app.capture.CaptureRegion
 import com.gameocr.app.capture.CaptureRegionBorderStyle
 import com.gameocr.app.capture.normalizedCaptureRegionBorderWidthDp
@@ -92,6 +93,9 @@ class SettingsRepository internal constructor(
         val RegionBorderWidth = intPreferencesKey("capture_region_border_width_dp")
         val RegionBorderStyle = stringPreferencesKey("capture_region_border_style")
         val RegionAdjustmentEnabled = booleanPreferencesKey("capture_region_adjustment_enabled")
+        val GameModuleId = stringPreferencesKey("game_module_id")
+        val GameZonesByModule = stringPreferencesKey("game_zones_by_module_json")
+        val GameSessionHistoryByModule = stringPreferencesKey("game_session_history_by_module_json")
         val Streaming = booleanPreferencesKey("streaming_translate")
         val RetryFailedTranslation = booleanPreferencesKey("retry_failed_translation")
         val LegacyRetryEmptyTranslation = booleanPreferencesKey("retry_empty_translation")
@@ -745,6 +749,10 @@ class SettingsRepository internal constructor(
                 normalizedCaptureRegionBorderWidthDp(next.captureRegionBorderWidthDp)
             prefs[Keys.RegionBorderStyle] = next.captureRegionBorderStyle.name
             prefs[Keys.RegionAdjustmentEnabled] = next.captureRegionAdjustmentEnabled
+            prefs[Keys.GameModuleId] = next.gameModuleId
+            prefs[Keys.GameZonesByModule] = json.encodeToString(next.gameZonesByModule)
+            prefs[Keys.GameSessionHistoryByModule] =
+                json.encodeToString(next.gameSessionHistoryByModule)
             prefs[Keys.Streaming] = next.streamingTranslate
             prefs[Keys.RetryFailedTranslation] = next.retryFailedTranslation
             prefs.remove(Keys.LegacyRetryEmptyTranslation)
@@ -1053,6 +1061,22 @@ class SettingsRepository internal constructor(
             }.getOrDefault(default.captureRegionBorderStyle),
             captureRegionAdjustmentEnabled = this[Keys.RegionAdjustmentEnabled]
                 ?: default.captureRegionAdjustmentEnabled,
+            gameModuleId = this[Keys.GameModuleId]?.takeIf { it.isNotBlank() }
+                ?: default.gameModuleId,
+            gameZonesByModule = this[Keys.GameZonesByModule]
+                ?.takeIf { it.isNotBlank() }
+                ?.let { raw ->
+                    runCatching { json.decodeFromString<Map<String, List<BoardZone>>>(raw) }
+                        .getOrDefault(emptyMap())
+                }
+                ?: default.gameZonesByModule,
+            gameSessionHistoryByModule = this[Keys.GameSessionHistoryByModule]
+                ?.takeIf { it.isNotBlank() }
+                ?.let { raw ->
+                    runCatching { json.decodeFromString<Map<String, List<String>>>(raw) }
+                        .getOrDefault(emptyMap())
+                }
+                ?: default.gameSessionHistoryByModule,
             streamingTranslate = this[Keys.Streaming] ?: default.streamingTranslate,
             retryFailedTranslation = this[Keys.RetryFailedTranslation]
                 ?: this[Keys.LegacyRetryEmptyTranslation]

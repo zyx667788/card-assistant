@@ -25,7 +25,7 @@ class FloatingMenuOrderTest {
                 MenuItemId.REGION,
                 MenuItemId.FULL_SCREEN_SKILL,
                 MenuItemId.INPUT_TRANSLATE_SKILL,
-                MenuItemId.LANGUAGE_PAIR,
+                MenuItemId.GAME_ASSISTANT_SKILL,
             ),
             FloatingMenu.DEFAULT_ORDER.take(5)
         )
@@ -133,6 +133,8 @@ class FloatingMenuOrderTest {
             onSwitchToFullScreen = {},
             onSwitchToWordSelect = {},
             onSwitchToInputTranslate = {},
+            onSwitchToGameAssistant = {},
+            onGameRegion = {},
         )
         listOf(
             Case(
@@ -203,6 +205,9 @@ class FloatingMenuOrderTest {
             Case(MenuItemId.INPUT_TRANSLATE_SKILL, FloatingSkill.WORD_SELECT, FloatingSkill.INPUT_TRANSLATE),
             Case(MenuItemId.INPUT_TRANSLATE_SKILL, FloatingSkill.LOOP, FloatingSkill.INPUT_TRANSLATE),
             Case(MenuItemId.INPUT_TRANSLATE_SKILL, FloatingSkill.INPUT_TRANSLATE, FloatingSkill.WORD_SELECT),
+            Case(MenuItemId.FULL_SCREEN_SKILL, FloatingSkill.GAME_ASSISTANT, FloatingSkill.FULL_SCREEN),
+            Case(MenuItemId.GAME_ASSISTANT_SKILL, FloatingSkill.FULL_SCREEN, FloatingSkill.GAME_ASSISTANT),
+            Case(MenuItemId.GAME_ASSISTANT_SKILL, FloatingSkill.GAME_ASSISTANT, FloatingSkill.GAME_ASSISTANT),
         ).forEach { case ->
             assertEquals(
                 "${case.slot} from ${case.current}",
@@ -219,6 +224,7 @@ class FloatingMenuOrderTest {
                 it == MenuItemId.LOOP ||
                     it == MenuItemId.FULL_SCREEN_SKILL ||
                     it == MenuItemId.INPUT_TRANSLATE_SKILL
+                    || it == MenuItemId.GAME_ASSISTANT_SKILL
             }
             .forEach { id ->
                 FloatingSkill.entries.forEach { current ->
@@ -233,6 +239,7 @@ class FloatingMenuOrderTest {
             onSwitchToLoop = {}, onRegion = {}, onLanguagePair = {}, onOpenMain = {},
             onOpenSettings = {}, onPresetSwitch = {}, onSwitchToFullScreen = {},
             onSwitchToWordSelect = {}, onSwitchToInputTranslate = {},
+            onSwitchToGameAssistant = {}, onGameRegion = {},
         )
         data class Case(val id: MenuItemId, val expectedLabel: Int)
         listOf(

@@ -1059,14 +1059,22 @@
     <string name="toast_skill_switched_loop">Loop mode selected. Tap the floating ball to start.</string>
     <string name="a11y_floating_ball">Screen Translator floating ball</string>
     <string name="a11y_floating_mode_full_screen">Full-screen translation mode</string>
+    <string name="a11y_floating_mode_game_assistant">Card assistant mode</string>
     <string name="a11y_floating_mode_word_select">Word-selection translation mode</string>
     <string name="a11y_floating_mode_loop_running">Loop translation mode, running</string>
     <string name="a11y_floating_mode_loop_stopped">Loop translation mode, stopped</string>
     <string name="a11y_floating_hint_full_screen">Double tap to translate. Long press to open the menu</string>
+    <string name="a11y_floating_hint_game_assistant">Tap to analyze the card table once. Long press to open the menu</string>
     <string name="a11y_floating_hint_word_select">Double tap to select text. Long press to open the menu</string>
     <string name="a11y_floating_hint_loop_start">Double tap to start looping. Long press to open the menu</string>
     <string name="a11y_floating_hint_loop_stop">Double tap to stop looping. Long press to open the menu</string>
     <string name="menu_pick_region">Region</string>
+    <string name="menu_game_region">Game zones</string>
+    <string name="game_region_step_format">Step %1$d/%2$d: %3$s</string>
+    <string name="game_region_step_hint">Drag to frame this zone, adjust it, then continue.</string>
+    <string name="game_region_btn_next">Next</string>
+    <string name="game_region_btn_finish">Finish</string>
+    <string name="game_session_reset">New game: analysis history cleared</string>
     <string name="menu_language_pair">Languages</string>
     <string name="menu_preset_switch">Presets</string>
     <string name="menu_open_settings">Settings</string>
@@ -1398,6 +1406,8 @@
     <!-- 0.4: arc menu skill switching + word selection translation -->
     <string name="menu_word_select">Word Select</string>
     <string name="menu_full_screen_skill">Full-screen Translate</string>
+    <string name="menu_game_assistant">Card assistant</string>
+    <string name="floating_skill_game_assistant_label">Card assistant</string>
     <string name="menu_next_page">Next Page</string>
     <string name="floating_tour_progress">Floating ball tour %1$d / %2$d</string>
     <string name="floating_tour_main_title">Long-press the blue floating ball</string>
@@ -1431,6 +1441,7 @@
     <string name="floating_skill_full_screen_label">Full-screen Translate</string>
     <string name="floating_skill_word_select_label">Word Select Translate</string>
     <string name="toast_skill_switched_full_screen">Tap the ball to translate full screen</string>
+    <string name="toast_skill_switched_game_assistant">Card assistant enabled: tap to analyze once</string>
     <string name="toast_skill_switched_word_select">Tap the ball to drag a selection</string>
     <string name="menu_input_translate">Input Translation</string>
     <string name="toast_skill_switched_input_translate">Tap the ball to translate the current input field</string>

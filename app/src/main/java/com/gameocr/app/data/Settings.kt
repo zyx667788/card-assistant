@@ -1,5 +1,7 @@
 package com.gameocr.app.data
 
+import com.gameocr.app.game.core.BoardZone
+import com.gameocr.app.game.core.GameModuleRegistry
 import androidx.annotation.StringRes
 import com.gameocr.app.R
 import com.gameocr.app.capture.CaptureRegion
@@ -74,6 +76,12 @@ data class Settings(
     val captureRegionBorderWidthDp: Int = DEFAULT_CAPTURE_REGION_BORDER_WIDTH_DP,
     val captureRegionBorderStyle: CaptureRegionBorderStyle = CaptureRegionBorderStyle.SOLID,
     val captureRegionAdjustmentEnabled: Boolean = false,
+    /** 当前牌类模块；首期默认湖南跑胡子。 */
+    val gameModuleId: String = GameModuleRegistry.DEFAULT_MODULE_ID,
+    /** 用户标定后的各模块区域；缺省时使用模块内置布局。 */
+    val gameZonesByModule: Map<String, List<BoardZone>> = emptyMap(),
+    /** 各模块的当局建议历史；服务重启后可继续提供上下文。 */
+    val gameSessionHistoryByModule: Map<String, List<String>> = emptyMap(),
     val overlayStyleMode: OverlayStyleMode = OverlayStyleMode.FIXED,
     val overlayTextSizeSp: Int = 14,
     val overlayTextStyle: OverlayTextStyle = OverlayTextStyle(),
@@ -1025,6 +1033,7 @@ enum class FloatingSkill {
     WORD_SELECT,
     LOOP,
     INPUT_TRANSLATE,
+    GAME_ASSISTANT,
 }
 
 @Serializable
@@ -1049,6 +1058,8 @@ enum class MenuItemId {
     HOME,
     FULL_SCREEN_SKILL,
     INPUT_TRANSLATE_SKILL,
+    GAME_ASSISTANT_SKILL,
+    GAME_REGION,
 }
 
 /** 弧菜单分页 / 默认顺序常量。 */
@@ -1075,6 +1086,8 @@ object FloatingMenu {
         MenuItemId.HOME,
         MenuItemId.FULL_SCREEN_SKILL,
         MenuItemId.INPUT_TRANSLATE_SKILL,
+        MenuItemId.GAME_ASSISTANT_SKILL,
+        MenuItemId.GAME_REGION,
     )
 
     /**
@@ -1087,6 +1100,8 @@ object FloatingMenu {
         MenuItemId.REGION,
         MenuItemId.FULL_SCREEN_SKILL,
         MenuItemId.INPUT_TRANSLATE_SKILL,
+        MenuItemId.GAME_ASSISTANT_SKILL,
+        MenuItemId.GAME_REGION,
         MenuItemId.LANGUAGE_PAIR,
         MenuItemId.PRESET_SWITCH,
         MenuItemId.SETTINGS,

@@ -1058,14 +1058,22 @@
     <string name="toast_skill_switched_loop">已切换到循环翻译，点击悬浮球开始</string>
     <string name="a11y_floating_ball">屏译悬浮球</string>
     <string name="a11y_floating_mode_full_screen">全屏翻译模式</string>
+    <string name="a11y_floating_mode_game_assistant">打牌助手模式</string>
     <string name="a11y_floating_mode_word_select">划词翻译模式</string>
     <string name="a11y_floating_mode_loop_running">循环翻译模式，运行中</string>
     <string name="a11y_floating_mode_loop_stopped">循环翻译模式，已停止</string>
     <string name="a11y_floating_hint_full_screen">双击开始翻译，长按打开菜单</string>
+    <string name="a11y_floating_hint_game_assistant">单击分析当前牌局，长按打开菜单</string>
     <string name="a11y_floating_hint_word_select">双击开始划词，长按打开菜单</string>
     <string name="a11y_floating_hint_loop_start">双击开始循环，长按打开菜单</string>
     <string name="a11y_floating_hint_loop_stop">双击停止循环，长按打开菜单</string>
     <string name="menu_pick_region">截图区域</string>
+    <string name="menu_game_region">牌局区域标定</string>
+    <string name="game_region_step_format">第 %1$d/%2$d 步：%3$s</string>
+    <string name="game_region_step_hint">拖动框选该区域，可继续微调，确认后进入下一步。</string>
+    <string name="game_region_btn_next">下一步</string>
+    <string name="game_region_btn_finish">完成</string>
+    <string name="game_session_reset">已开始新一局，决策历史已清空</string>
     <string name="menu_language_pair">语言方向</string>
     <string name="menu_preset_switch">切换预设</string>
     <string name="menu_open_settings">设置</string>
@@ -1397,6 +1405,8 @@
     <!-- 0.4：弧菜单技能切换 + 划词翻译 -->
     <string name="menu_word_select">划词翻译</string>
     <string name="menu_full_screen_skill">全屏翻译</string>
+    <string name="menu_game_assistant">打牌助手</string>
+    <string name="floating_skill_game_assistant_label">打牌助手</string>
     <string name="menu_next_page">下一组</string>
     <string name="floating_tour_progress">悬浮球漫游 %1$d / %2$d</string>
     <string name="floating_tour_main_title">请长按蓝色悬浮球</string>
@@ -1430,6 +1440,7 @@
     <string name="floating_skill_full_screen_label">全屏翻译</string>
     <string name="floating_skill_word_select_label">划词翻译</string>
     <string name="toast_skill_switched_full_screen">主球已切换：单击=全屏翻译</string>
+    <string name="toast_skill_switched_game_assistant">已切换打牌助手：单击悬浮球分析一次</string>
     <string name="toast_skill_switched_word_select">主球已切换：单击=拖动框选翻译</string>
     <string name="menu_input_translate">输入翻译</string>
     <string name="toast_skill_switched_input_translate">主球已切换：单击=翻译当前输入框</string>
