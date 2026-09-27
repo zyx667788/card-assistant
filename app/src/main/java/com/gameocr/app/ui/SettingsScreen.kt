@@ -12092,6 +12092,7 @@ private fun menuItemLabel(id: MenuItemId, currentSkill: FloatingSkill): String =
         MenuItemId.GAME_ASSISTANT_SKILL -> stringResource(R.string.menu_game_assistant)
         MenuItemId.REGION -> stringResource(R.string.settings_arc_menu_item_region)
         MenuItemId.GAME_REGION -> stringResource(R.string.menu_game_region)
+        MenuItemId.GAME_RECOGNIZER_TOGGLE -> stringResource(R.string.menu_game_recognizer)
         MenuItemId.LANGUAGE_PAIR -> stringResource(R.string.settings_arc_menu_item_language_pair)
         MenuItemId.PRESET_SWITCH -> stringResource(R.string.settings_arc_menu_item_preset)
         MenuItemId.SETTINGS -> stringResource(R.string.settings_arc_menu_item_settings)
@@ -12113,6 +12114,7 @@ private fun menuItemIconRes(id: MenuItemId, currentSkill: FloatingSkill): Int = 
         MenuItemId.GAME_ASSISTANT_SKILL -> R.drawable.ic_menu_full_screen
         MenuItemId.REGION -> R.drawable.ic_menu_region
         MenuItemId.GAME_REGION -> R.drawable.ic_menu_region
+        MenuItemId.GAME_RECOGNIZER_TOGGLE -> R.drawable.ic_menu_region
         MenuItemId.LANGUAGE_PAIR -> R.drawable.ic_menu_language_pair
         MenuItemId.PRESET_SWITCH -> R.drawable.ic_menu_preset
         MenuItemId.SETTINGS -> R.drawable.ic_menu_settings
