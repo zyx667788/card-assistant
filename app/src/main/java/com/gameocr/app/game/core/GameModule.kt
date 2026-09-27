@@ -8,13 +8,19 @@ data class AdviceContext(
     val history: List<String> = emptyList(),
 )
 
-/** 由 OCR 文本还原牌局状态。信息不足时返回 null，由调用方提示用户修正。 */
+/** 由一屏画面还原牌局状态。信息不足时返回 null，由调用方提示用户修正。 */
 interface BoardRecognizer {
-    fun recognize(
+    suspend fun recognize(
         spans: List<TileTextSpan>,
         zones: List<BoardZone>,
         imageWidth: Int,
         imageHeight: Int,
+        /**
+         * VLM 识别用的整屏截图（JPEG 字节）；OCR 路径不需要，可传 null。
+         * 这里刻意用 [ByteArray] 而不是 `android.graphics.Bitmap`，
+         * 让 game.core 保持纯 Kotlin、可脱离 Android 单独编译测试。
+         */
+        screenshotJpeg: ByteArray? = null,
     ): GameState?
 }
 

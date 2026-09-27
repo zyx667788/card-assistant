@@ -25,6 +25,8 @@ data class PaohuziState(
     val opponents: List<PaohuziOpponentView> = emptyList(),
     val remainingTileCount: Int? = null,
     val actionHint: String? = null,
+    /** VLM 看完全局后的一句话观察（OCR 路径为空），会拼进决策提示词。 */
+    val visualContext: String? = null,
     val notes: List<String> = emptyList(),
     override val moduleId: String = PAOHUZI_MODULE_ID,
 ) : GameState {
@@ -63,6 +65,7 @@ data class PaohuziState(
         }
         remainingTileCount?.let { appendLine("【剩余未摸】$it 张") }
         actionHint?.takeIf { it.isNotBlank() }?.let { appendLine("【画面提示】$it") }
+        visualContext?.takeIf { it.isNotBlank() }?.let { appendLine("【全局观察】$it") }
         if (notes.isNotEmpty()) {
             appendLine("【识别备注】" + notes.joinToString("；"))
         }

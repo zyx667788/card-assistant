@@ -1070,6 +1070,7 @@
     <string name="a11y_floating_hint_loop_stop">Double tap to stop looping. Long press to open the menu</string>
     <string name="menu_pick_region">Region</string>
     <string name="menu_game_region">Game zones</string>
+    <string name="menu_game_recognizer">Switch recognizer</string>
     <string name="game_region_step_format">Step %1$d/%2$d: %3$s</string>
     <string name="game_region_step_hint">Drag to frame this zone, adjust it, then continue.</string>
     <string name="game_region_btn_next">Next</string>

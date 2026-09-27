@@ -134,6 +134,7 @@ object SettingsFieldPolicy {
         portable("captureRegionBorderStyle", R.string.settings_floating_window_border_style_label),
         portable("captureRegionAdjustmentEnabled", R.string.settings_capture_region_move_enabled),
         portable("gameModuleId"),
+        portable("gameRecognizer"),
         deviceLocal("gameZonesByModule"),
         deviceLocal("gameSessionHistoryByModule", diagnostic = SettingsDiagnostic.SUMMARY),
         portable("overlayStyleMode", R.string.settings_search_item_overlay_theme),

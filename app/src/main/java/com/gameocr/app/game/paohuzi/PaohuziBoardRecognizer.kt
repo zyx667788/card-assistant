@@ -18,11 +18,12 @@ class PaohuziBoardRecognizer(
     private val parser: PaohuziOcrParser = PaohuziOcrParser(),
 ) : BoardRecognizer {
 
-    override fun recognize(
+    override suspend fun recognize(
         spans: List<TileTextSpan>,
         zones: List<BoardZone>,
         imageWidth: Int,
         imageHeight: Int,
+        screenshotJpeg: ByteArray?,
     ): GameState? {
         if (zones.isEmpty()) return null
 

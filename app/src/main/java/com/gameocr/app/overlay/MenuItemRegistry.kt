@@ -79,6 +79,12 @@ object MenuItemRegistry {
                 labelRes = R.string.menu_game_region,
                 onTap = callbacks.onGameRegion,
             ))
+            MenuItemId.GAME_RECOGNIZER_TOGGLE -> listOf(MenuItem(
+                iconRes = R.drawable.ic_menu_region,
+                bgRes = R.drawable.bg_arc_menu_item,
+                labelRes = R.string.menu_game_recognizer,
+                onTap = callbacks.onGameRecognizerToggle,
+            ))
             MenuItemId.LANGUAGE_PAIR -> listOf(MenuItem(
                 iconRes = R.drawable.ic_menu_language_pair,
                 bgRes = R.drawable.bg_arc_menu_item,
@@ -181,5 +187,6 @@ object MenuItemRegistry {
         val onSwitchToInputTranslate: () -> Unit,
         val onSwitchToGameAssistant: () -> Unit,
         val onGameRegion: () -> Unit,
+        val onGameRecognizerToggle: () -> Unit,
     )
 }

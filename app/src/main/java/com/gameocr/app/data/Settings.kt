@@ -2,6 +2,7 @@ package com.gameocr.app.data
 
 import com.gameocr.app.game.core.BoardZone
 import com.gameocr.app.game.core.GameModuleRegistry
+import com.gameocr.app.game.core.GameRecognizerKind
 import androidx.annotation.StringRes
 import com.gameocr.app.R
 import com.gameocr.app.capture.CaptureRegion
@@ -35,7 +36,7 @@ internal fun normalizedFloatingButtonAlpha(value: Float): Float =
 data class Settings(
     val baseUrl: String = "https://api.deepseek.com/v1/",
     val apiKey: String = "",
-    val model: String = "deepseek-v4-flash",
+    val model: String = "deepseek-flash",
     val anthropicBaseUrl: String = DEFAULT_ANTHROPIC_BASE_URL,
     val anthropicApiKey: String = "",
     val anthropicModel: String = DEFAULT_ANTHROPIC_MODEL,
@@ -82,6 +83,8 @@ data class Settings(
     val gameZonesByModule: Map<String, List<BoardZone>> = emptyMap(),
     /** 各模块的当局建议历史；服务重启后可继续提供上下文。 */
     val gameSessionHistoryByModule: Map<String, List<String>> = emptyMap(),
+    /** 牌局识别方式；VLM 直接看整张截图，不需要标定区域。 */
+    val gameRecognizer: GameRecognizerKind = GameRecognizerKind.VLM,
     val overlayStyleMode: OverlayStyleMode = OverlayStyleMode.FIXED,
     val overlayTextSizeSp: Int = 14,
     val overlayTextStyle: OverlayTextStyle = OverlayTextStyle(),
@@ -1060,6 +1063,7 @@ enum class MenuItemId {
     INPUT_TRANSLATE_SKILL,
     GAME_ASSISTANT_SKILL,
     GAME_REGION,
+    GAME_RECOGNIZER_TOGGLE,
 }
 
 /** 弧菜单分页 / 默认顺序常量。 */
@@ -1088,6 +1092,7 @@ object FloatingMenu {
         MenuItemId.INPUT_TRANSLATE_SKILL,
         MenuItemId.GAME_ASSISTANT_SKILL,
         MenuItemId.GAME_REGION,
+        MenuItemId.GAME_RECOGNIZER_TOGGLE,
     )
 
     /**
@@ -1102,6 +1107,7 @@ object FloatingMenu {
         MenuItemId.INPUT_TRANSLATE_SKILL,
         MenuItemId.GAME_ASSISTANT_SKILL,
         MenuItemId.GAME_REGION,
+        MenuItemId.GAME_RECOGNIZER_TOGGLE,
         MenuItemId.LANGUAGE_PAIR,
         MenuItemId.PRESET_SWITCH,
         MenuItemId.SETTINGS,

@@ -4,6 +4,7 @@ import com.gameocr.app.game.core.BoardZone
 import com.gameocr.app.game.core.BoardZoneRole
 import com.gameocr.app.game.core.NormalizedRect
 import com.gameocr.app.game.core.TileTextSpan
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -91,12 +92,14 @@ class PaohuziBoardRecognizerTest {
 
     @Test
     fun `returns null when nothing is recognised in the hand zone`() {
-        val state = recognizer.recognize(
-            spans = listOf(spanAt("開始", 100, 100)),
-            zones = PaohuziGameModule.DEFAULT_ZONES,
-            imageWidth = 1000,
-            imageHeight = 1000,
-        )
+        val state = runBlocking {
+            recognizer.recognize(
+                spans = listOf(spanAt("開始", 100, 100)),
+                zones = PaohuziGameModule.DEFAULT_ZONES,
+                imageWidth = 1000,
+                imageHeight = 1000,
+            )
+        }
         assertNull(state)
     }
 
@@ -112,12 +115,14 @@ class PaohuziBoardRecognizerTest {
             // 操作提示区：画面 62%~72%
             spanAt("可以吃 五", 500, 670),
         )
-        val state = recognizer.recognize(
-            spans = spans,
-            zones = PaohuziGameModule.DEFAULT_ZONES,
-            imageWidth = 1000,
-            imageHeight = 1000,
-        ) as PaohuziState
+        val state = runBlocking {
+            recognizer.recognize(
+                spans = spans,
+                zones = PaohuziGameModule.DEFAULT_ZONES,
+                imageWidth = 1000,
+                imageHeight = 1000,
+            )
+        } as PaohuziState
 
         assertEquals(
             listOf(
@@ -141,24 +146,28 @@ class PaohuziBoardRecognizerTest {
             spanAt("三", 180, 850),
             spanAt("可以吃 二 五", 500, 670),
         )
-        val state = recognizer.recognize(
-            spans = spans,
-            zones = PaohuziGameModule.DEFAULT_ZONES,
-            imageWidth = 1000,
-            imageHeight = 1000,
-        ) as PaohuziState
+        val state = runBlocking {
+            recognizer.recognize(
+                spans = spans,
+                zones = PaohuziGameModule.DEFAULT_ZONES,
+                imageWidth = 1000,
+                imageHeight = 1000,
+            )
+        } as PaohuziState
 
         assertNull(state.incomingTile)
     }
 
     @Test
     fun `keeps tiles out of roles they were not recognised in`() {
-        val state = recognizer.recognize(
-            spans = listOf(spanAt("一", 100, 850), spanAt("二", 140, 850)),
-            zones = PaohuziGameModule.DEFAULT_ZONES,
-            imageWidth = 1000,
-            imageHeight = 1000,
-        ) as PaohuziState
+        val state = runBlocking {
+            recognizer.recognize(
+                spans = listOf(spanAt("一", 100, 850), spanAt("二", 140, 850)),
+                zones = PaohuziGameModule.DEFAULT_ZONES,
+                imageWidth = 1000,
+                imageHeight = 1000,
+            )
+        } as PaohuziState
 
         assertEquals(2, state.hand.size)
         assertTrue(state.tableDiscards.isEmpty())

@@ -13,6 +13,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.gameocr.app.R
 import com.gameocr.app.game.core.BoardZone
+import com.gameocr.app.game.core.GameRecognizerKind
 import com.gameocr.app.capture.CaptureRegion
 import com.gameocr.app.capture.CaptureRegionBorderStyle
 import com.gameocr.app.capture.normalizedCaptureRegionBorderWidthDp
@@ -96,6 +97,7 @@ class SettingsRepository internal constructor(
         val GameModuleId = stringPreferencesKey("game_module_id")
         val GameZonesByModule = stringPreferencesKey("game_zones_by_module_json")
         val GameSessionHistoryByModule = stringPreferencesKey("game_session_history_by_module_json")
+        val GameRecognizer = stringPreferencesKey("game_recognizer")
         val Streaming = booleanPreferencesKey("streaming_translate")
         val RetryFailedTranslation = booleanPreferencesKey("retry_failed_translation")
         val LegacyRetryEmptyTranslation = booleanPreferencesKey("retry_empty_translation")
@@ -753,6 +755,7 @@ class SettingsRepository internal constructor(
             prefs[Keys.GameZonesByModule] = json.encodeToString(next.gameZonesByModule)
             prefs[Keys.GameSessionHistoryByModule] =
                 json.encodeToString(next.gameSessionHistoryByModule)
+            prefs[Keys.GameRecognizer] = next.gameRecognizer.name
             prefs[Keys.Streaming] = next.streamingTranslate
             prefs[Keys.RetryFailedTranslation] = next.retryFailedTranslation
             prefs.remove(Keys.LegacyRetryEmptyTranslation)
@@ -1077,6 +1080,9 @@ class SettingsRepository internal constructor(
                         .getOrDefault(emptyMap())
                 }
                 ?: default.gameSessionHistoryByModule,
+            gameRecognizer = this[Keys.GameRecognizer]
+                ?.let { raw -> runCatching { GameRecognizerKind.valueOf(raw) }.getOrNull() }
+                ?: default.gameRecognizer,
             streamingTranslate = this[Keys.Streaming] ?: default.streamingTranslate,
             retryFailedTranslation = this[Keys.RetryFailedTranslation]
                 ?: this[Keys.LegacyRetryEmptyTranslation]

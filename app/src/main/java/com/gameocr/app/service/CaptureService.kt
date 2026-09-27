@@ -70,6 +70,7 @@ import com.gameocr.app.capture.shouldHideFloatingButtonForCapture
 import com.gameocr.app.shizuku.ShizukuCapabilities
 import com.gameocr.app.data.LogRepository
 import com.gameocr.app.data.LoopTriggerMode
+import com.gameocr.app.game.core.GameRecognizerKind
 import com.gameocr.app.data.CaptureContentOrientation
 import com.gameocr.app.data.LoopTextRegionMode
 import com.gameocr.app.data.OcrEngineKind
@@ -553,6 +554,7 @@ class CaptureService : Service() {
             it.onMenuGameRegion = {
                 startActivity(GameRegionPickerActivity.newIntent(this, null))
             }
+            it.onMenuGameRecognizerToggle = { toggleGameRecognizer() }
             it.onMenuLanguagePair = { showLanguageQuickSwitchOverlay() }
             it.onMenuPresetSwitch = { showPresetQuickSwitchOverlay() }
             it.onMenuOpenSettings = {
@@ -790,9 +792,27 @@ class CaptureService : Service() {
         }
     }
 
+    /**
+     * 弧菜单「切换识别器」：在「本地 OCR」与「云端 VLM」之间二选一切换。
+     * VLM 模式不需要标定区域，整张截图直发模型看全局。
+     */
+    private fun toggleGameRecognizer() {
+        scope.launch {
+            val current = settingsRepository.get()
+            val next = if (current.gameRecognizer == GameRecognizerKind.VLM) {
+                GameRecognizerKind.OCR
+            } else {
+                GameRecognizerKind.VLM
+            }
+            settingsRepository.update { it.copy(gameRecognizer = next) }
+            withContext(Dispatchers.Main) {
+                overlay?.showInfoHint("牌局识别已切换为${next.displayName}", 2500L)
+            }
+        }
+    }
+
     /** 单击打牌助手：截一帧，跑 OCR + 牌局解析 + LLM 决策，最后显示可核对悬浮卡。 */
-    private fun triggerGameAdviceAnalysis() {
-        if (gameAdviceJob?.isActive == true) return
+    private fun triggerGameAdviceAnalysis() {        if (gameAdviceJob?.isActive == true) return
         if (!captureLock.tryLock()) {
             mainScope.launch { overlay?.showErrorHint("正在处理上一帧，请稍候", 2500L) }
             return

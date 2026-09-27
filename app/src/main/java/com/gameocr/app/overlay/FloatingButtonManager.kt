@@ -77,6 +77,8 @@ class FloatingButtonManager(
     /** 菜单第二项「截图区域调整」回调，由 CaptureService 赋值。 */
     @Volatile var onMenuPickRegion: () -> Unit = {}
     @Volatile var onMenuGameRegion: () -> Unit = {}
+    /** 弧菜单「切换识别器」回调：OCR / VLM 二选一切换，由 CaptureService 赋值。 */
+    @Volatile var onMenuGameRecognizerToggle: () -> Unit = {}
     @Volatile var onMenuLanguagePair: () -> Unit = {}
     /** 菜单第三项「返回主应用」回调，由 CaptureService 赋值。 */
     @Volatile var onMenuOpenMainActivity: () -> Unit = {}
@@ -1310,6 +1312,7 @@ class FloatingButtonManager(
                     onSwitchSkill(FloatingSkill.GAME_ASSISTANT)
                 },
                 onGameRegion = { dismissArcMenu(); onMenuGameRegion() },
+                onGameRecognizerToggle = { dismissArcMenu(); onMenuGameRecognizerToggle() },
             )
         )
         val pages = MenuItemRegistry.paginate(allItems, pageSize = arcMenuPageSize) { nextIdx ->
