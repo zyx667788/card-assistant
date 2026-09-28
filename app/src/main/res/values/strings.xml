@@ -1008,7 +1008,7 @@
     <string name="log_category_ocr">OCR</string>
     <string name="log_category_translate">Translate</string>
     <string name="log_category_crash">Crash</string>
-    <string name="log_export_header_format">Screen Translator logs (%1$d entries)</string>
+    <string name="log_export_header_format">Card Assistant logs (%1$d entries)</string>
     <string name="log_export_export_time">Exported at: </string>
     <string name="log_export_source">Source: </string>
     <string name="log_export_translated">Translation: </string>
@@ -1028,8 +1028,8 @@
     <string name="log_snack_copied_full">Copied full log to clipboard</string>
     <string name="log_snack_copied_summary">Log was too large for the clipboard, so a summary was copied. Use share to save the full log.</string>
     <string name="log_share_chooser">Share / save logs</string>
-    <string name="log_share_subject">Screen Translator logs</string>
-    <string name="log_clipboard_label">Screen Translator logs</string>
+    <string name="log_share_subject">Card Assistant logs</string>
+    <string name="log_clipboard_label">Card Assistant logs</string>
     <string name="log_message_pair">Source → Translation</string>
     <string name="log_action_expand_full">Expand full log</string>
     <string name="log_action_collapse">Collapse</string>
@@ -1057,7 +1057,7 @@
     <!-- Floating button arc menu (long press) -->
     <string name="menu_loop_translate">Loop</string>
     <string name="toast_skill_switched_loop">Loop mode selected. Tap the floating ball to start.</string>
-    <string name="a11y_floating_ball">Screen Translator floating ball</string>
+    <string name="a11y_floating_ball">Card Assistant floating ball</string>
     <string name="a11y_floating_mode_full_screen">Full-screen translation mode</string>
     <string name="a11y_floating_mode_game_assistant">Card assistant mode</string>
     <string name="a11y_floating_mode_word_select">Word-selection translation mode</string>
@@ -1122,12 +1122,12 @@
     <!-- Notification -->
     <string name="notif_channel_name">Capture &amp; translate service</string>
     <string name="notif_channel_desc">Foreground capture + OCR + translate</string>
-    <string name="notif_title">Screen Translator running</string>
+    <string name="notif_title">Card Assistant running</string>
     <string name="notif_text">Tap the floating ball to run its current mode long-press for menu</string>
 
     <!-- Accessibility -->
     <string name="a11y_desc">Used for volume-key shortcuts and Input Translation. Input-field text is read only when you tap the floating ball; password input fields are never read.</string>
-    <string name="a11y_summary">Screen Translator Shortcuts</string>
+    <string name="a11y_summary">Card Assistant shortcuts</string>
 
     <!-- Baidu OCR endpoint names / quotas -->
     <string name="baidu_endpoint_general_basic_name">Standard (no location)</string>

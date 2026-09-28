@@ -1007,7 +1007,7 @@
     <string name="log_category_ocr">OCR</string>
     <string name="log_category_translate">翻译</string>
     <string name="log_category_crash">崩溃</string>
-    <string name="log_export_header_format">屏译 运行日志（%1$d 条）</string>
+    <string name="log_export_header_format">打牌助手 运行日志（%1$d 条）</string>
     <string name="log_export_export_time">导出时间：</string>
     <string name="log_export_source">原文: </string>
     <string name="log_export_translated">译文: </string>
@@ -1027,8 +1027,8 @@
     <string name="log_snack_copied_full">已复制完整日志到剪贴板</string>
     <string name="log_snack_copied_summary">日志过大，已复制摘要。如需完整日志，请用分享保存。</string>
     <string name="log_share_chooser">分享 / 保存日志</string>
-    <string name="log_share_subject">屏译 运行日志</string>
-    <string name="log_clipboard_label">屏译 运行日志</string>
+    <string name="log_share_subject">打牌助手 运行日志</string>
+    <string name="log_clipboard_label">打牌助手 运行日志</string>
     <string name="log_message_pair">原文 → 译文</string>
     <string name="log_action_expand_full">展开完整日志</string>
     <string name="log_action_collapse">收起</string>
@@ -1056,7 +1056,7 @@
     <!-- 悬浮球弧形菜单（长按弹出） -->
     <string name="menu_loop_translate">循环翻译</string>
     <string name="toast_skill_switched_loop">已切换到循环翻译，点击悬浮球开始</string>
-    <string name="a11y_floating_ball">屏译悬浮球</string>
+    <string name="a11y_floating_ball">打牌助手悬浮球</string>
     <string name="a11y_floating_mode_full_screen">全屏翻译模式</string>
     <string name="a11y_floating_mode_game_assistant">打牌助手模式</string>
     <string name="a11y_floating_mode_word_select">划词翻译模式</string>
@@ -1121,12 +1121,12 @@
     <!-- 通知 -->
     <string name="notif_channel_name">截屏翻译服务</string>
     <string name="notif_channel_desc">前台运行截屏 + OCR + 翻译</string>
-    <string name="notif_title">屏译 运行中</string>
+    <string name="notif_title">打牌助手 运行中</string>
     <string name="notif_text">点击悬浮球执行当前模式 长按打开菜单</string>
 
     <!-- 无障碍 -->
     <string name="a11y_desc">用于音量键快捷操作和输入翻译。输入框文字只会在你主动点击操作球时读取；不会读取密码类型的输入框。</string>
-    <string name="a11y_summary">屏译 快捷操作</string>
+    <string name="a11y_summary">打牌助手 快捷操作</string>
 
     <!-- 百度 OCR endpoint 显示名 / 免费配额 -->
     <string name="baidu_endpoint_general_basic_name">标准版（无位置）</string>
