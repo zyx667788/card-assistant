@@ -78,6 +78,28 @@ game/ui/          牌局建议悬浮卡
 
 Windows 环境说明见 [docs/game-assistant/LOCAL-DEV.md](docs/game-assistant/LOCAL-DEV.md)。
 
+## 发版
+
+测试包和正式包都在 GitHub Actions 上构建，不用本地出包：
+
+| 目标 | 操作 | 会发生什么 |
+|---|---|---|
+| 测试包 | 推一个 `debug-*` tag | `debug-release.yml` 跑单测 + `assembleDebug`，把 APK 和 `.sha256` 发到 GitHub Release |
+| 正式包 | 推一个 `v*` tag | `release.yml` 用仓库 secrets 里的 keystore 签名并发布 |
+
+```bash
+# 测试包（示例）：tag 名自带日期 / 主题，方便区分
+git tag debug-20260928-run-log && git push origin debug-20260928-run-log
+
+# 正式包（需要先配置签名 secrets）
+git tag v0.4.8 && git push origin v0.4.8
+```
+
+- 每次 push 到 `main` / `dev` 都会跑 `ci.yml`（单测 + assembleDebug + lint），APK 作为该次 run 的 Artifacts 保存。
+- 正式包需要在仓库配置 `RELEASE_KEYSTORE_BASE64` / `RELEASE_KEYSTORE_PASSWORD` / `RELEASE_KEY_ALIAS` / `RELEASE_KEY_PASSWORD`；
+  没配置时 `release.yml` 会失败，测试包不受影响。
+- 也可以在 Actions 页面手动触发 `Debug Release`，填入已存在的 tag 重新构建。
+
 ## 设计边界
 
 - 只读取屏幕并给出建议，不自动操作游戏。

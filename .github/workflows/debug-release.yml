@@ -1,0 +1,90 @@
+name: Debug Release
+
+# 推 debug-* tag 时在 GitHub 上构建 debug APK 并直接发 Release。
+# 也可以在 Actions 页面手动跑（workflow_dispatch），指定一个已存在的 tag 重新构建。
+#
+# 这样发出去的包始终来自 CI 的干净环境，而不是某台机器的本地构建。
+on:
+  push:
+    tags:
+      - 'debug-*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '已存在的 tag，例如 debug-20260928-run-log'
+        required: true
+
+permissions:
+  contents: write  # 创建 GitHub Release / 上传 assets 需要
+
+concurrency:
+  group: debug-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    name: Build debug APK and publish release
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # 仓库未提交 gradle-wrapper.jar，CI 上先用 setup-gradle 装的 gradle 生成
+      - name: Generate Gradle wrapper jar
+        run: gradle wrapper --gradle-version 8.10.2 --distribution-type bin
+
+      - name: Stub local.properties
+        run: |
+          if [ ! -f local.properties ]; then
+            echo "sdk.dir=$ANDROID_HOME" > local.properties
+          fi
+
+      - name: Test and build debug APK
+        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+
+      - name: Package APK
+        id: package
+        env:
+          TAG: ${{ github.event.inputs.tag || github.ref_name }}
+        run: |
+          set -euo pipefail
+          APK="app/build/outputs/apk/debug/app-debug.apk"
+          if [ ! -f "$APK" ]; then
+            echo "::error::debug APK not found at $APK"
+            exit 1
+          fi
+          ASSET="CardAssistant-debug-${TAG}.apk"
+          cp "$APK" "$ASSET"
+          sha256sum "$ASSET" > "$ASSET.sha256"
+          echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
+          echo "checksum=$ASSET.sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: 打牌助手 debug 版 ${{ github.event.inputs.tag || github.ref_name }}
+          body: |
+            GitHub Actions 在该 tag 的源码上构建（commit ${{ github.sha }}）。
+
+            安装：下载下面的 `CardAssistant-debug-*.apk` 直接安装。
+            这是 debug 包（applicationId 带 `.debug` 后缀），可以与正式包共存。
+            同目录的 `.sha256` 可用于校验下载完整性。
+          files: |
+            ${{ steps.package.outputs.asset }}
+            ${{ steps.package.outputs.checksum }}
+          fail_on_unmatched_files: true
