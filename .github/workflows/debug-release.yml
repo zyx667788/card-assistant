@@ -67,17 +67,20 @@ jobs:
             echo "::error::debug APK not found at $APK"
             exit 1
           fi
-          ASSET="CardAssistant-debug-${TAG}.apk"
+          # tag 形如 debug-20260928-run-log，展示名去掉 debug- 前缀，避免出现 debug-debug-
+          LABEL="${TAG#debug-}"
+          ASSET="CardAssistant-debug-${LABEL}.apk"
           cp "$APK" "$ASSET"
           sha256sum "$ASSET" > "$ASSET.sha256"
           echo "asset=$ASSET" >> "$GITHUB_OUTPUT"
           echo "checksum=$ASSET.sha256" >> "$GITHUB_OUTPUT"
+          echo "label=$LABEL" >> "$GITHUB_OUTPUT"
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
-          name: 打牌助手 debug 版 ${{ github.event.inputs.tag || github.ref_name }}
+          name: 打牌助手 debug 版（${{ steps.package.outputs.label }}）
           body: |
             GitHub Actions 在该 tag 的源码上构建（commit ${{ github.sha }}）。
 
