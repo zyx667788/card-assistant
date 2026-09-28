@@ -1,4 +1,4 @@
-package com.gameocr.app.game.vlm
+package com.gameocr.app.game.doudizhu
 
 import android.util.Base64
 import com.gameocr.app.data.SettingsRepository
@@ -23,15 +23,12 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
 /**
- * 纯提示词模式的 VLM 识别器。
+ * 斗地主识别器：整屏截图 → VLM 按 eyes 提示词输出结构化 JSON → 本地校验。
  *
- * 与跑胡子识别器的区别只有提示词：[eyesSystemPrompt] / [eyesUserPrompt]
- * 由调用方（DI 绑定）按模式传入，例如斗地主的看牌口径。
- * 输出不做 JSON 结构化解析——VLM 按提示词写出的牌局描述原文
- * 直接存进 [VlmPromptState]，交给决策提示词使用。
+ * 与跑胡子的区别只有提示词和解析目标；两者都要求模型给出逐张、带花色的牌面，
+ * 再由本地用 54 张牌的硬约束复核，避免「4 个 7 数成 3 个」这类计数错误。
  */
-class VlmPromptBoardRecognizer(
-    private val moduleId: String,
+class DoudizhuVlmBoardRecognizer(
     private val eyesSystemPrompt: String,
     private val eyesUserPrompt: String,
     private val client: OkHttpClient,
@@ -105,18 +102,32 @@ class VlmPromptBoardRecognizer(
         put("temperature", 0.1)
         put("max_tokens", 2048)
         put("stream", false)
-        // DeepSeek V4.1 的思考模式默认开启；识别是描述任务不需要深度思考，
-        // 关掉可以显著降低延迟。大多数 OpenAI 兼容接口会直接忽略未知字段。
+        putJsonObject("response_format") { put("type", "json_object") }
+        // 结构化抽取不需要深度思考，关掉可以显著降低延迟；兼容接口会忽略未知字段。
         putJsonObject("thinking") { put("type", "disabled") }
     }.toString()
 
-    private fun parseBoard(raw: String): VlmPromptState {
+    private fun parseBoard(raw: String): DoudizhuState {
         val content = runCatching {
             json.decodeFromString<AdviceChatResponse>(raw)
                 .choices.firstOrNull()?.message?.content
-        }.getOrNull()?.let(::stripCodeFences)?.takeIf { it.isNotBlank() }
+        }.getOrNull()?.takeIf { it.isNotBlank() }
             ?: throw VlmRecognitionException("模型返回了空内容")
-        return VlmPromptState(moduleId = moduleId, boardText = content)
+
+        val payload = runCatching {
+            json.decodeFromString<DoudizhuVlmPayload>(stripCodeFences(content))
+        }.getOrNull() ?: throw VlmRecognitionException("模型返回的牌局数据解析失败，请重试")
+
+        val state = DoudizhuVlmBoardParser.parse(payload)
+            ?: throw VlmRecognitionException("没识别出手牌，请确认画面里能看到自己的牌")
+
+        // 硬错误（同一张牌重复 / 某点数超过 4 张 / 手牌与已出牌重合）说明这次识别不可信，
+        // 直接要求重新识别，不要拿矛盾数据去算建议。
+        if (state.validation.isFatal) {
+            val detail = state.validation.errors.take(2).joinToString("；")
+            throw VlmRecognitionException("识别结果自相矛盾（$detail），请重新截图识别")
+        }
+        return state
     }
 
     private fun stripCodeFences(content: String): String {

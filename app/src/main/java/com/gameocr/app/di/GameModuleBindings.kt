@@ -4,12 +4,12 @@ import android.content.Context
 import com.gameocr.app.game.advice.LlmAdviceEngine
 import com.gameocr.app.game.core.AdviceEngine
 import com.gameocr.app.game.core.GameModule
+import com.gameocr.app.game.doudizhu.DoudizhuGameModule
+import com.gameocr.app.game.doudizhu.DoudizhuPromptPolicy
+import com.gameocr.app.game.doudizhu.DoudizhuVlmBoardRecognizer
 import com.gameocr.app.game.paohuzi.PaohuziGameModule
 import com.gameocr.app.game.paohuzi.PaohuziPromptPolicy
 import com.gameocr.app.game.paohuzi.PaohuziVlmBoardRecognizer
-import com.gameocr.app.game.vlm.VlmPromptBoardRecognizer
-import com.gameocr.app.game.vlm.VlmPromptGameModule
-import com.gameocr.app.game.vlm.VlmPromptPolicy
 import com.gameocr.app.data.SettingsRepository
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
@@ -48,9 +48,8 @@ object GameModuleBindings {
     fun provideAdviceEngine(engine: LlmAdviceEngine): AdviceEngine = engine
 
     /**
-     * 斗地主模块：纯提示词模式，没有本地规则引擎。
-     * eyes 看牌口径、advisor 决策口径、rules 规则说明都在
-     * `assets/game/doudizhu/` 里，调提示词不用改代码。
+     * 斗地主模块：逐张带花色的结构化识别 + 本地校验 + 本地规则算合法动作。
+     * eyes 看牌口径、advisor 决策口径、rules 规则说明都在 `assets/game/doudizhu/` 里。
      */
     @Provides
     @IntoSet
@@ -66,15 +65,12 @@ object GameModuleBindings {
             .ifBlank { FALLBACK_DOUDIZHU_EYES }
         val advisorTemplate = readAssetText(context, DOUDIZHU_ADVISOR_ASSET)
             .ifBlank { FALLBACK_DOUDIZHU_ADVISOR }
-        return VlmPromptGameModule(
-            id = DOUDIZHU_MODULE_ID,
-            displayName = "斗地主",
-            promptPolicy = VlmPromptPolicy(
+        return DoudizhuGameModule(
+            promptPolicy = DoudizhuPromptPolicy(
                 rulesSummary = rulesSummary,
                 advisorSystemPrompt = advisorTemplate.replace(RULES_PLACEHOLDER, rulesSummary),
             ),
-            recognizer = VlmPromptBoardRecognizer(
-                moduleId = DOUDIZHU_MODULE_ID,
+            recognizer = DoudizhuVlmBoardRecognizer(
                 eyesSystemPrompt = eyesSystem,
                 eyesUserPrompt = FALLBACK_DOUDIZHU_EYES_USER,
                 client = client,
@@ -95,7 +91,6 @@ object GameModuleBindings {
         }.getOrNull()?.trim().orEmpty()
 
     private const val PAOHUZI_RULES_ASSET = "game/paohuzi/rules.md"
-    private const val DOUDIZHU_MODULE_ID = "doudizhu"
     private const val DOUDIZHU_EYES_ASSET = "game/doudizhu/eyes.md"
     private const val DOUDIZHU_ADVISOR_ASSET = "game/doudizhu/advisor.md"
     private const val DOUDIZHU_RULES_ASSET = "game/doudizhu/rules.md"
@@ -119,9 +114,10 @@ object GameModuleBindings {
     """.trimIndent()
 
     private const val FALLBACK_DOUDIZHU_EYES =
-        "你是斗地主牌局识别器。看截图，按【我的手牌】【我的身份】【地主牌】【上家出牌】【下家出牌】【桌面其他】【操作提示】【备注】八个部分输出牌局描述，看不清的填「未知」，不要编造。"
+        "你是斗地主牌局识别器。只输出 JSON，字段为 hand/role/bottom_cards/last_play_seat/last_play/played_cards/my_remaining/up_remaining/down_remaining/action_hint/global_observation。" +
+            "hand 必须逐张列出并带花色（如 黑桃7、红桃7），同一张牌不能重复；看不清的不要编造。"
 
-    private const val FALLBACK_DOUDIZHU_EYES_USER = "识别这张斗地主牌局截图，按 system 要求的格式输出牌局描述。"
+    private const val FALLBACK_DOUDIZHU_EYES_USER = "识别这张斗地主牌局截图，按 system 要求的 JSON 格式输出。"
 
     private val FALLBACK_DOUDIZHU_ADVISOR = """
         你是一名斗地主陪练助手。依据用户消息里的牌局信息，给出下一步怎么出；信息不足时在理由里说明，不要编造没给出的牌。
