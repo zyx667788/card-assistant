@@ -1,6 +1,7 @@
 package com.gameocr.app.ui
 
 import androidx.compose.foundation.clickable
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
@@ -57,6 +59,19 @@ fun MainScreen(
     val context = LocalContext.current
     val settings by viewModel.settings.collectAsState()
     val serviceRunning by CaptureServiceState.running.collectAsState()
+    val logs by viewModel.logs.collectAsState()
+    var showLogs by remember { mutableStateOf(false) }
+
+    // 日志页复用手写状态切换，不引入导航依赖。
+    if (showLogs) {
+        BackHandler { showLogs = false }
+        LogScreen(
+            entries = logs,
+            onClear = viewModel::clearLogs,
+            onClose = { showLogs = false },
+        )
+        return
+    }
 
     Scaffold { padding ->
         Column(
@@ -295,6 +310,29 @@ fun MainScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Text(
+                        stringResource(R.string.log_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        stringResource(R.string.log_summary, logs.size),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { showLogs = true },
+                    ) {
+                        Text(stringResource(R.string.log_open))
+                    }
+                }
+            }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,

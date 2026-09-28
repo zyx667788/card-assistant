@@ -45,6 +45,31 @@
     <string name="advice_action_rerun">Re-analyze</string>
     <string name="advice_action_new_game">New game</string>
 
+    <!-- Run logs -->
+    <string name="log_title">Run logs</string>
+    <string name="log_open">View logs</string>
+    <string name="log_close">Close</string>
+    <string name="log_copy">Copy</string>
+    <string name="log_share">Export</string>
+    <string name="log_clear">Clear</string>
+    <string name="log_empty">No logs yet. They appear here after you analyze a board with the floating ball.</string>
+    <string name="log_filter_all">All</string>
+    <string name="log_filter_warn">Warnings</string>
+    <string name="log_filter_error">Errors</string>
+    <string name="log_count">Entries: %1$d</string>
+    <string name="log_elapsed">%1$d ms</string>
+    <string name="log_level_info">INFO</string>
+    <string name="log_level_warn">WARN</string>
+    <string name="log_level_error">ERROR</string>
+    <string name="log_category_capture">Capture</string>
+    <string name="log_category_recognition">Recognize</string>
+    <string name="log_category_advice">Advice</string>
+    <string name="log_category_crash">Crash</string>
+    <string name="log_copied">Logs copied</string>
+    <string name="log_cleared">Logs cleared</string>
+    <string name="log_export_failed">Export failed</string>
+    <string name="log_summary">Kept in memory only (max 200), currently %1$d; cleared when the app restarts</string>
+
     <!-- Main -->
 
     <string name="quick_settings_tile_label">Card assistant capture</string>

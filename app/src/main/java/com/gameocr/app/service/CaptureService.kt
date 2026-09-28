@@ -362,17 +362,30 @@ class CaptureService : Service() {
                 mainScope.async { hintOverlay?.showLoadingHint() }.await()
                 prepareCleanCaptureFrame()
                 val shotter = screenshotter
+                val captureStartedAt = android.os.SystemClock.elapsedRealtime()
                 bitmap = if (shotter == null) null else screenshotLock.withLock { shotter.capture() }
                 restoreCaptureChrome(showLoading = true)
-                if (bitmap == null) {
+                val captureElapsedMs = android.os.SystemClock.elapsedRealtime() - captureStartedAt
+                val frame = bitmap
+                if (frame == null) {
+                    logRepository.error(
+                        category = LogRepository.Category.CAPTURE,
+                        message = getString(R.string.log_msg_capture_failed),
+                        elapsedMs = captureElapsedMs,
+                    )
                     withContext(Dispatchers.Main) {
                         hintOverlay?.dismissLoading()
                         hintOverlay?.showErrorHint(getString(R.string.assistant_hint_capture_failed))
                     }
                     return@launch
                 }
+                logRepository.info(
+                    category = LogRepository.Category.CAPTURE,
+                    message = "截屏成功 ${frame.width}x${frame.height}",
+                    elapsedMs = captureElapsedMs,
+                )
                 val settings = settingsRepository.get()
-                val outcome = gameTurnCoordinator.analyze(bitmap, settings)
+                val outcome = gameTurnCoordinator.analyze(frame, settings)
                 withContext(Dispatchers.Main) {
                     hintOverlay?.dismissLoading()
                     gameAdviceOverlay?.show(

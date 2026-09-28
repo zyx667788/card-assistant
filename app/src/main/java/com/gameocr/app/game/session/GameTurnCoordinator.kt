@@ -1,6 +1,8 @@
 package com.gameocr.app.game.session
 
 import android.graphics.Bitmap
+import android.os.SystemClock
+import com.gameocr.app.data.LogRepository
 import com.gameocr.app.data.Settings
 import com.gameocr.app.game.core.AdviceContext
 import com.gameocr.app.game.core.AdviceEngine
@@ -48,6 +50,7 @@ class GameTurnCoordinator @Inject constructor(
     private val adviceEngine: AdviceEngine,
     private val modules: GameModuleRegistry,
     private val sessions: GameSessionManager,
+    private val logs: LogRepository,
 ) {
     suspend fun analyze(bitmap: Bitmap, settings: Settings): GameTurnOutcome {
         val module = modules.findOrNull(settings.gameModuleId) ?: modules.default
@@ -56,19 +59,43 @@ class GameTurnCoordinator @Inject constructor(
         val recognizer: BoardRecognizer = module.recognizer
         val screenshotJpeg = encodeScreenshotForVlm(bitmap)
 
+        val recognizeStartedAt = SystemClock.elapsedRealtime()
         val state = try {
             recognizer.recognize(screenshotJpeg)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: VlmRecognitionException) {
+            logs.error(
+                category = LogRepository.Category.RECOGNITION,
+                message = error.message ?: "VLM 识别失败",
+                elapsedMs = SystemClock.elapsedRealtime() - recognizeStartedAt,
+            )
             return GameTurnOutcome.Error(error.message ?: "VLM 识别失败")
         } catch (error: Exception) {
+            logs.error(
+                category = LogRepository.Category.RECOGNITION,
+                message = "识别失败：${error.message ?: error.javaClass.simpleName}",
+                t = error,
+                elapsedMs = SystemClock.elapsedRealtime() - recognizeStartedAt,
+            )
             return GameTurnOutcome.Error("识别失败：${error.message ?: error.javaClass.simpleName}")
         } ?: return GameTurnOutcome.RecognitionFailed(
             module = module,
             message = "没有识别出足够的手牌，请重试或检查画面是否清晰。",
         )
 
+        // 识别明细写进日志：排查「这次为什么认错牌」时，这一行就是现场。
+        logs.info(
+            category = LogRepository.Category.RECOGNITION,
+            message = "识别成功：" + state.toPromptText()
+                .lineSequence()
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+                .joinToString("；"),
+            elapsedMs = SystemClock.elapsedRealtime() - recognizeStartedAt,
+        )
+
+        val adviceStartedAt = SystemClock.elapsedRealtime()
         val request = AdviceRequest(
             moduleId = module.id,
             systemPrompt = module.promptPolicy.systemPrompt(),
@@ -80,13 +107,26 @@ class GameTurnCoordinator @Inject constructor(
         return when (val result = adviceEngine.advise(request)) {
             is AdviceResult.Success -> {
                 sessions.record(module.id, state, result.advice)
+                logs.info(
+                    category = LogRepository.Category.ADVICE,
+                    message = "建议：" + result.advice.action.displayName +
+                        result.advice.targetTile?.takeIf { it.isNotBlank() }?.let { " $it" }.orEmpty(),
+                    elapsedMs = SystemClock.elapsedRealtime() - adviceStartedAt,
+                )
                 GameTurnOutcome.AdviceReady(module, state, result.advice)
             }
-            is AdviceResult.Failure -> GameTurnOutcome.AdviceFailed(
-                module = module,
-                state = state,
-                message = result.message,
-            )
+            is AdviceResult.Failure -> {
+                logs.error(
+                    category = LogRepository.Category.ADVICE,
+                    message = result.message,
+                    elapsedMs = SystemClock.elapsedRealtime() - adviceStartedAt,
+                )
+                GameTurnOutcome.AdviceFailed(
+                    module = module,
+                    state = state,
+                    message = result.message,
+                )
+            }
         }
     }
 

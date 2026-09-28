@@ -8,70 +8,55 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * App 内可见的运行日志。区别于 [timber.log.Timber]（只到 logcat，用户看不到），
- * 这里的日志是给用户调试用：识别原文、翻译译文、接口错误等。
+ * App 内可查看的运行日志。
+ *
+ * 区别于 [timber.log.Timber]（只写 logcat，用户看不到），这里的日志会在「运行日志」页里
+ * 展示，也能复制 / 导出，方便在手机上直接排查「这次为什么没识别出来」。
  *
  * 设计取舍：
- * - **仅内存**：不持久化，App 重启清空。OCR/翻译日志可能含敏感游戏文本，落盘有隐私风险。
- * - **环形缓冲 [CAPACITY]**：超过容量的旧日志被丢弃，避免长时间运行 OOM。
- * - **StateFlow**：UI 用 collectAsState 订阅，每 add 一条触发一次重组。
- *
- * 用法：在 OCR/翻译路径里直接调 [info]/[warn]/[error]/[pair]。
+ * - **仅内存**：不落盘，App 重启清空。识别结果含牌局信息，落盘有隐私风险。
+ * - **环形缓冲 [CAPACITY]**：超过容量丢最旧的，避免长时间运行占用内存。
+ * - **StateFlow**：UI 订阅后每加一条自动刷新。
  */
 @Singleton
 class LogRepository @Inject constructor() {
 
+    /** 日志级别，声明顺序即严重程度（INFO < WARN < ERROR）。 */
     enum class Level { INFO, WARN, ERROR }
-    enum class Category { CAPTURE, OCR, TRANSLATE, CRASH }
+
+    /** 日志来源，对应应用里的几条主链路。 */
+    enum class Category { CAPTURE, RECOGNITION, ADVICE, CRASH }
 
     data class Entry(
-        /** 全局递增唯一 id。同毫秒并发产生多条日志时也保证不撞，给 LazyColumn 用作稳定 key。 */
+        /** 全局递增 id：同毫秒并发写日志也不会撞，给列表当稳定 key。 */
         val id: Long,
         val timestamp: Long,
         val level: Level,
         val category: Category,
         val message: String,
+        /** 这一步耗时，例如一次 VLM 识别用了多久。 */
         val elapsedMs: Long? = null,
-        val imagePath: String? = null,
-        /** 可选：OCR / 翻译这种场景的源文本。 */
-        val source: String? = null,
-        /** 可选：翻译完成后的译文。 */
-        val translated: String? = null
     )
 
     private val idGen = AtomicLong(0)
     private val _entries = MutableStateFlow<List<Entry>>(emptyList())
+
+    /** 最近 [CAPACITY] 条日志，按时间从旧到新。 */
     val entries: StateFlow<List<Entry>> = _entries.asStateFlow()
-
-    /** App 内运行日志在 Debug / Release 都保留；系统 Logcat 由构建类型单独控制。 */
-    @Volatile
-    internal var verboseEnabled: Boolean = true
-
-    internal fun configureVerbose(developerOptionsEnabled: Boolean) {
-        verboseEnabled = RuntimeLogPolicy.verboseEnabled(
-            debugBuild = false,
-            developerOptionsEnabled = developerOptionsEnabled,
-        )
-    }
 
     fun info(
         category: Category,
         message: String,
         elapsedMs: Long? = null,
-        imagePath: String? = null,
         timestamp: Long = System.currentTimeMillis(),
-    ) {
-        if (!verboseEnabled) return
-        add(Level.INFO, category, message, elapsedMs, imagePath, timestamp)
-    }
+    ) = add(Level.INFO, category, message, elapsedMs, timestamp)
 
     fun warn(
         category: Category,
         message: String,
         elapsedMs: Long? = null,
-        imagePath: String? = null,
         timestamp: Long = System.currentTimeMillis(),
-    ) = add(Level.WARN, category, message, elapsedMs, imagePath, timestamp)
+    ) = add(Level.WARN, category, message, elapsedMs, timestamp)
 
     fun error(
         category: Category,
@@ -81,23 +66,7 @@ class LogRepository @Inject constructor() {
         timestamp: Long = System.currentTimeMillis(),
     ) {
         val full = if (t != null) "$message: ${t.javaClass.simpleName}: ${t.message}" else message
-        add(Level.ERROR, category, full, elapsedMs, timestamp = timestamp)
-    }
-
-    /** 记录一对"原文 → 译文"（翻译场景）。 */
-    fun pair(category: Category, source: String, translated: String, elapsedMs: Long? = null) {
-        if (!verboseEnabled) return
-        val e = Entry(
-            id = idGen.incrementAndGet(),
-            timestamp = System.currentTimeMillis(),
-            level = Level.INFO,
-            category = category,
-            elapsedMs = elapsedMs,
-            message = "原文 → 译文",
-            source = source,
-            translated = translated
-        )
-        push(e)
+        add(Level.ERROR, category, full, elapsedMs, timestamp)
     }
 
     fun clear() {
@@ -109,8 +78,7 @@ class LogRepository @Inject constructor() {
         category: Category,
         message: String,
         elapsedMs: Long?,
-        imagePath: String? = null,
-        timestamp: Long = System.currentTimeMillis(),
+        timestamp: Long,
     ) {
         push(
             Entry(
@@ -120,7 +88,6 @@ class LogRepository @Inject constructor() {
                 category = category,
                 message = message,
                 elapsedMs = elapsedMs,
-                imagePath = imagePath
             )
         )
     }
@@ -128,7 +95,7 @@ class LogRepository @Inject constructor() {
     private fun push(e: Entry) {
         val current = _entries.value
         val next = if (current.size >= CAPACITY) {
-            // 丢最旧的，append 新的；保留最近 CAPACITY 条
+            // 丢最旧的，保留最近 CAPACITY 条
             current.drop(current.size - CAPACITY + 1) + e
         } else {
             current + e
@@ -137,14 +104,6 @@ class LogRepository @Inject constructor() {
     }
 
     companion object {
-        private const val CAPACITY = 200
+        internal const val CAPACITY = 200
     }
-}
-
-internal object RuntimeLogPolicy {
-    @Suppress("UNUSED_PARAMETER")
-    fun verboseEnabled(
-        debugBuild: Boolean,
-        developerOptionsEnabled: Boolean,
-    ): Boolean = true
 }

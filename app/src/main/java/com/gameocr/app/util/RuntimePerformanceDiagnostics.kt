@@ -18,8 +18,8 @@ internal enum class RuntimePerformanceStage(
     val minimumSlowdownMs: Long,
 ) {
     CAPTURE("截屏", LogRepository.Category.CAPTURE, 750L),
-    OCR("OCR", LogRepository.Category.OCR, 1_500L),
-    TRANSLATION("翻译", LogRepository.Category.TRANSLATE, 3_000L),
+    RECOGNITION("识别", LogRepository.Category.RECOGNITION, 3_000L),
+    ADVICE("决策", LogRepository.Category.ADVICE, 3_000L),
 }
 
 internal data class RuntimePerformanceAnomalyDecision(
@@ -475,16 +475,16 @@ class RuntimePerformanceDiagnostics @Inject constructor(
         val warning = synchronized(lock) {
             if (
                 performanceOverlayEnabled &&
-                (stage == RuntimePerformanceStage.OCR || stage == RuntimePerformanceStage.TRANSLATION)
+                (stage == RuntimePerformanceStage.RECOGNITION || stage == RuntimePerformanceStage.ADVICE)
             ) {
                 val resource = resourceSampler.sample()
                 performanceUpdate = _performanceSnapshot.value.copy(
-                    ocrElapsedMs = if (stage == RuntimePerformanceStage.OCR) {
+                    ocrElapsedMs = if (stage == RuntimePerformanceStage.RECOGNITION) {
                         elapsedMs
                     } else {
                         _performanceSnapshot.value.ocrElapsedMs
                     },
-                    translationElapsedMs = if (stage == RuntimePerformanceStage.TRANSLATION) {
+                    translationElapsedMs = if (stage == RuntimePerformanceStage.ADVICE) {
                         elapsedMs
                     } else {
                         _performanceSnapshot.value.translationElapsedMs
