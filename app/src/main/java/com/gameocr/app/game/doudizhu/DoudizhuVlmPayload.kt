@@ -53,6 +53,7 @@ object DoudizhuVlmBoardParser {
                 playedCards = played,
                 bottomCards = bottom,
                 role = role,
+                myRemaining = payload.myRemaining,
             ),
         )
     }

@@ -63,14 +63,29 @@ class DoudizhuBoardValidatorTest {
         assertTrue(result.warnings.any { it.contains("花色") })
     }
 
+    /** 中局手牌本来就不满 17 / 20 张，不能用开局张数卡；改用画面上的剩余张数核对。 */
     @Test
-    fun `wrong hand size is a warning not an error`() {
+    fun `mismatch with on screen remaining count warns`() {
         val result = DoudizhuBoardValidator.validate(
-            cards("黑桃3 红桃4 梅花5"),
-            role = DoudizhuRole.LANDLORD,
+            hand = cards("黑桃3 红桃4 梅花5"),
+            role = DoudizhuRole.FARMER,
+            myRemaining = 4,
         )
-        assertFalse(result.isFatal)
-        assertTrue(result.warnings.any { it.contains("地主") })
+        assertFalse("只是可疑，不算硬错误", result.isFatal)
+        assertTrue(
+            "应提示漏牌",
+            result.warnings.any { it.contains("剩 4 张") && it.contains("3 张") },
+        )
+    }
+
+    @Test
+    fun `hand matching the on screen count has no warning`() {
+        val result = DoudizhuBoardValidator.validate(
+            hand = cards("黑桃3 红桃4 梅花5"),
+            role = DoudizhuRole.FARMER,
+            myRemaining = 3,
+        )
+        assertFalse(result.warnings.any { it.contains("漏牌") })
     }
 
     @Test

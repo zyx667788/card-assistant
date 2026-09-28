@@ -41,8 +41,6 @@ data class DoudizhuValidation(
  */
 object DoudizhuBoardValidator {
 
-    const val LANDLORD_HAND_SIZE = 20
-    const val FARMER_HAND_SIZE = 17
     const val MAX_HAND_SIZE = 20
     const val BOTTOM_CARD_SIZE = 3
 
@@ -51,6 +49,7 @@ object DoudizhuBoardValidator {
         playedCards: List<DoudizhuCard> = emptyList(),
         bottomCards: List<DoudizhuCard> = emptyList(),
         role: DoudizhuRole = DoudizhuRole.UNKNOWN,
+        myRemaining: Int? = null,
     ): DoudizhuValidation {
         val errors = mutableListOf<String>()
         val warnings = mutableListOf<String>()
@@ -91,18 +90,16 @@ object DoudizhuBoardValidator {
                 errors += "${suit.label}${rank.label} 既在手牌里又被当成已出牌"
             }
 
-        // 4) 手牌张数：地主 20 张、农民 17 张
+        // 4) 手牌张数：只有「一张牌单手最多 20 张」和「画面上的剩余张数」是硬线索。
+        // 对局中手牌会越打越少，所以不能拿 17 / 20 这种开局张数去卡。
         if (hand.size > MAX_HAND_SIZE) {
             errors += "手牌识别到 ${hand.size} 张，超过一副牌里单人可能的上限 $MAX_HAND_SIZE 张"
         }
-        when (role) {
-            DoudizhuRole.LANDLORD -> if (hand.size != LANDLORD_HAND_SIZE) {
-                warnings += "地主应有 $LANDLORD_HAND_SIZE 张手牌，识别到 ${hand.size} 张"
-            }
-            DoudizhuRole.FARMER -> if (hand.size != FARMER_HAND_SIZE) {
-                warnings += "农民应有 $FARMER_HAND_SIZE 张手牌，识别到 ${hand.size} 张"
-            }
-            DoudizhuRole.UNKNOWN -> warnings += "没识别出身份（地主 / 农民）"
+        if (role == DoudizhuRole.UNKNOWN) {
+            warnings += "没识别出身份（地主 / 农民）"
+        }
+        if (myRemaining != null && myRemaining != hand.size) {
+            warnings += "画面显示我剩 $myRemaining 张，逐张列出只有 ${hand.size} 张，可能漏牌或重复"
         }
 
         // 5) 没给花色时无法核对重复，只能提示
