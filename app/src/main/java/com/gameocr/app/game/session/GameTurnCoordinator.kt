@@ -57,13 +57,7 @@ class GameTurnCoordinator @Inject constructor(
         val screenshotJpeg = encodeScreenshotForVlm(bitmap)
 
         val state = try {
-            recognizer.recognize(
-                spans = emptyList(),
-                zones = emptyList(),
-                imageWidth = bitmap.width,
-                imageHeight = bitmap.height,
-                screenshotJpeg = screenshotJpeg,
-            )
+            recognizer.recognize(screenshotJpeg)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (error: VlmRecognitionException) {

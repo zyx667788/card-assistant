@@ -1,24 +1,24 @@
-Screen Translator (屏译)
+打牌助手 (Card Assistant)
 Copyright 2026 ciddwd
 
 Modifications in this fork
 ==========================
 
-This repository is a modified fork of Screen Translator. The fork keeps the
-original screen-capture, OCR, overlay-window and model-invocation
-infrastructure, and adds a card-game assistant domain on top of it:
-a pluggable game-module framework, a Paohuzi (字牌) rules engine, on-screen
-board recognition from OCR text, and an advice engine that reuses the
-existing OpenAI-compatible configuration. The added and modified files are
-documented in docs/game-assistant/. Files added by this fork remain under
-the Apache License, Version 2.0.
+This repository began as a fork of Screen Translator and has since been
+reworked into a card-game decision assistant. The translation pipeline,
+on-device OCR, text-to-speech and bundled local model runtimes have been
+removed. What remains is the screen-capture and overlay infrastructure,
+reused as a pluggable game-module framework, a Paohuzi (字牌) rules engine,
+whole-screen recognition through a cloud vision model, and a decision engine
+built on an OpenAI-compatible configuration. Architecture notes live in
+docs/game-assistant/. Files added by this fork remain under the Apache
+License, Version 2.0.
 
 Project license
 ===============
 
 Screen Translator is licensed under the Apache License, Version 2.0.
-The complete license text is distributed in the repository as LICENSE and in
-the Android application as apache_license_2_0.txt.
+The complete license text is distributed in the repository as LICENSE.
 
 Project license source:
 https://github.com/ciddwd/overlay-translator/blob/main/LICENSE
@@ -28,14 +28,14 @@ Third-party runtime software
 
 The Android release runtime dependency graph and the native code built into the
 application include the principal projects below. Version numbers refer to the
-v0.4.7 build configuration. Transitive modules belonging to the same project
+0.4.7 build configuration. Transitive modules belonging to the same project
 family are grouped together.
 
 Apache License 2.0
 ------------------
 
 - AndroidX: Activity, AppCompat, Compose, Core, DataStore, DynamicAnimation,
-  ExifInterface, Hilt integration, Lifecycle, Navigation, Room and WorkManager
+  Hilt integration and Lifecycle
   https://github.com/androidx/androidx
 - Material Components for Android 1.12.0
   https://github.com/material-components/material-components-android
@@ -46,9 +46,6 @@ Apache License 2.0
 - Dagger and Hilt 2.53.1, including the injection and annotation support used
   by their runtime dependency graph
   https://github.com/google/dagger
-- Google support libraries used transitively by ML Kit, including
-  Android Data Transport and Firebase Components / Encoders
-  https://github.com/firebase/firebase-android-sdk
 - Apache-licensed annotation and injection support used transitively, including
   Error Prone Annotations, JSpecify, JSR-305, javax.inject and Jakarta Inject
   https://github.com/google/error-prone
@@ -65,11 +62,9 @@ Apache License 2.0
   https://github.com/JakeWharton/retrofit2-kotlinx-serialization-converter
 - Timber 5.0.1
   https://github.com/JakeWharton/timber
-- Vulkan-Headers 1.3.275, used by the bundled llama.cpp Vulkan backend
-  https://github.com/KhronosGroup/Vulkan-Headers
 
 The complete Apache License 2.0 text is provided with this application in
-apache_license_2_0.txt and at:
+LICENSE and at:
 https://www.apache.org/licenses/LICENSE-2.0
 
 MIT License
@@ -77,17 +72,6 @@ MIT License
 
 - Shizuku API 13.1.5 — Copyright (c) 2021 RikkaW
   https://github.com/RikkaApps/Shizuku-API
-- ONNX Runtime Android 1.20.0 — Copyright (c) Microsoft Corporation.
-  All rights reserved.
-  https://github.com/microsoft/onnxruntime/blob/v1.20.0/LICENSE
-- llama.cpp — Copyright (c) 2023-2026 The ggml authors
-  https://github.com/ggml-org/llama.cpp
-- nlohmann/json — Copyright (c) 2013-2026 Niels Lohmann
-  https://github.com/nlohmann/json
-- cpp-httplib — Copyright (c) 2017 yhirose
-  https://github.com/yhirose/cpp-httplib
-- SPIRV-Headers — Copyright (c) 2015-2024 The Khronos Group Inc.
-  https://github.com/KhronosGroup/SPIRV-Headers
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

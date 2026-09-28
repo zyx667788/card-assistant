@@ -10,18 +10,12 @@ data class AdviceContext(
 
 /** 由一屏画面还原牌局状态。信息不足时返回 null，由调用方提示用户修正。 */
 interface BoardRecognizer {
-    suspend fun recognize(
-        spans: List<TileTextSpan>,
-        zones: List<BoardZone>,
-        imageWidth: Int,
-        imageHeight: Int,
-        /**
-         * VLM 识别用的整屏截图（JPEG 字节）；OCR 路径不需要，可传 null。
-         * 这里刻意用 [ByteArray] 而不是 `android.graphics.Bitmap`，
-         * 让 game.core 保持纯 Kotlin、可脱离 Android 单独编译测试。
-         */
-        screenshotJpeg: ByteArray? = null,
-    ): GameState?
+    /**
+     * 识别用的整屏截图（JPEG 字节）。
+     * 这里刻意用 [ByteArray] 而不是 `android.graphics.Bitmap`，
+     * 让 game.core 保持纯 Kotlin、可脱离 Android 单独编译测试。
+     */
+    suspend fun recognize(screenshotJpeg: ByteArray?): GameState?
 }
 
 /** 把牌局状态渲染成模型可读的提示词。 */
@@ -37,15 +31,12 @@ interface PromptPolicy {
 /**
  * 一个牌类模块（跑胡子、斗地主、麻将……）。
  *
- * 模块自带区域布局、识别器和提示词，新增玩法只需要再实现一个 [GameModule] 并注册进
+ * 模块自带识别器和提示词，新增玩法只需要再实现一个 [GameModule] 并注册进
  * [GameModuleRegistry]，不需要改动决策链路。
  */
 interface GameModule {
     val id: String
     val displayName: String
-
-    /** 首次使用时的默认区域布局；用户在手机上标定后会覆盖坐标。 */
-    val defaultZones: List<BoardZone>
 
     val recognizer: BoardRecognizer
     val promptPolicy: PromptPolicy

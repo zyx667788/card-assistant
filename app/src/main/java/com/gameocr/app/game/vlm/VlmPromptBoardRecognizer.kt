@@ -5,9 +5,7 @@ import com.gameocr.app.data.SettingsRepository
 import com.gameocr.app.data.withApiTimeout
 import com.gameocr.app.game.advice.AdviceChatResponse
 import com.gameocr.app.game.core.BoardRecognizer
-import com.gameocr.app.game.core.BoardZone
 import com.gameocr.app.game.core.GameState
-import com.gameocr.app.game.core.TileTextSpan
 import com.gameocr.app.game.core.VlmRecognitionException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -42,10 +40,6 @@ class VlmPromptBoardRecognizer(
 ) : BoardRecognizer {
 
     override suspend fun recognize(
-        spans: List<TileTextSpan>,
-        zones: List<BoardZone>,
-        imageWidth: Int,
-        imageHeight: Int,
         screenshotJpeg: ByteArray?,
     ): GameState? = withContext(Dispatchers.IO) {
         val settings = settingsRepository.settings.first()

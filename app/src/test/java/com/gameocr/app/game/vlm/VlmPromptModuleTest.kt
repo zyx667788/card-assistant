@@ -79,16 +79,11 @@ recognizer = FakeRecognizer(),
 )
 assertEquals("doudizhu", module.id)
 assertEquals("斗地主", module.displayName)
-assertTrue(module.defaultZones.isEmpty())
 }
 
-private class FakeRecognizer: com.gameocr.app.game.core.BoardRecognizer {
-override suspend fun recognize(
-spans: List<com.gameocr.app.game.core.TileTextSpan>,
-zones: List<com.gameocr.app.game.core.BoardZone>,
-imageWidth: Int,
-imageHeight: Int,
-screenshotJpeg: ByteArray?,
-): com.gameocr.app.game.core.GameState? = null
+    private class FakeRecognizer : com.gameocr.app.game.core.BoardRecognizer {
+        override suspend fun recognize(
+            screenshotJpeg: ByteArray?,
+        ): com.gameocr.app.game.core.GameState? = null
 }
 }

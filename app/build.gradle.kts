@@ -87,20 +87,6 @@ android {
         buildConfig = true
     }
 
-    packaging {
-        resources {
-            excludes += "/META-INF/AL2.0"
-        }
-        // 必须开启：:llama-android 引入的 llama.cpp 用 GGML_BACKEND_DL=ON 模式，启动时
-        // ggml_backend_load_all_from_path() 用 readdir 扫 nativeLibraryDir 找
-        // libggml-cpu-android_*.so 系列 dlopen。AGP 5.0+ 默认 useLegacyPackaging=false 不把
-        // native libs 解压到 /data/app/.../lib/arm64/（留在 APK 内），导致 readdir 拿到空目录
-        // → "no backends are loaded" → loadModel 必败。
-        // 腾讯官方 Hy-MT demo APK manifest 里 extractNativeLibs=true 同此目的。
-        jniLibs {
-            useLegacyPackaging = true
-        }
-    }
 }
 
 dependencies {
