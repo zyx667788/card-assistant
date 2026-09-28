@@ -40,7 +40,10 @@ boardText = "3 4 5 6\n轮到我出牌",
 
 @Test
 fun `system prompt is the advisor prompt verbatim`() {
-assertEquals("你是斗地主陪练。一副 54 张牌。只输出 JSON。", policy.systemPrompt())
+        val prompt = policy.systemPrompt()
+        assertTrue(prompt.startsWith("你是斗地主陪练。一副 54 张牌。只输出 JSON。"))
+        assertTrue(prompt.contains("只允许输出画面中明确可见且符合规则的牌"))
+        assertTrue(prompt.contains("无法确认时 action 必须为 pass"))
 }
 
 @Test

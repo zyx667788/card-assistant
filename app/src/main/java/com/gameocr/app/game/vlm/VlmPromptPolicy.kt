@@ -16,7 +16,15 @@ override val rulesSummary: String,
 private val advisorSystemPrompt: String,
 ): PromptPolicy {
 
-override fun systemPrompt(): String = advisorSystemPrompt
+override fun systemPrompt(): String = buildString {
+    appendLine(advisorSystemPrompt.trim())
+    appendLine()
+    appendLine("【合法性约束】")
+    appendLine("- 只允许输出画面中明确可见且符合规则的牌。")
+    appendLine("- 只能使用【我的手牌】里实际存在的牌。")
+    appendLine("- play 必须符合当前牌权和上一手牌型；无法确认时 action 必须为 pass。")
+    appendLine("- 不得编造识别结果中未出现的牌。")
+}
 
 override fun userPrompt(state: GameState, context: AdviceContext): String = buildString {
 appendLine("")

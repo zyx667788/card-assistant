@@ -11,32 +11,6 @@ hilt {
     enableAggregatingTask = false
 }
 
-val localLlmGenerationThreads = providers
-    .gradleProperty("localLlmGenerationThreads")
-    .orElse("6")
-    .get()
-    .toInt()
-require(localLlmGenerationThreads == 4 || localLlmGenerationThreads == 6) {
-    "localLlmGenerationThreads must be 4 or 6 for the controlled TG/PP A/B test"
-}
-
-val localLlmBatchSize = providers
-    .gradleProperty("localLlmBatchSize")
-    .orElse("4")
-    .get()
-    .toInt()
-require(localLlmBatchSize in setOf(1, 2, 4, 8)) {
-    "localLlmBatchSize must be one of 1, 2, 4, or 8"
-}
-
-val mangaOcrBatchSize = providers
-    .gradleProperty("mangaOcrBatchSize")
-    .orElse("4")
-    .get()
-    .toInt()
-require(mangaOcrBatchSize in setOf(1, 2, 4)) {
-    "mangaOcrBatchSize must be one of 1, 2, or 4"
-}
 
 android {
     namespace = "com.gameocr.app"
@@ -49,13 +23,6 @@ android {
         versionCode = 20
         versionName = "0.4.7"
 
-        // Controlled local-LLM A/B switch. PP remains device-policy selected (6 on the
-        // target 8-core phone); TG can be rebuilt as 4 or 6 without source changes.
-        buildConfigField("int", "LOCAL_LLM_GENERATION_THREADS", localLlmGenerationThreads.toString())
-        // Independent llama.cpp sequences decoded together. B1 remains the serial baseline.
-        buildConfigField("int", "LOCAL_LLM_BATCH_SIZE", localLlmBatchSize.toString())
-        // Controlled Manga OCR ONNX batch A/B switch; batch=1 preserves the serial baseline.
-        buildConfigField("int", "MANGA_OCR_BATCH_SIZE", mangaOcrBatchSize.toString())
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
