@@ -31,13 +31,12 @@ private val Context.dataStore by preferencesDataStore("game_ocr_settings")
  */
 @Singleton
 class SettingsRepository internal constructor(
-    private val context: Context,
     secretCipher: SettingsSecretCipher,
     private val settingsStore: DataStore<Preferences>,
 ) {
     @Inject
     constructor(@ApplicationContext context: Context, secretCipher: SettingsSecretCipher) :
-        this(context, secretCipher, context.dataStore)
+        this(secretCipher, context.dataStore)
 
     private val secretCodec = SettingsSecretCodec(secretCipher)
     private val json = Json { ignoreUnknownKeys = true; explicitNulls = false }
@@ -83,10 +82,14 @@ class SettingsRepository internal constructor(
 
     suspend fun get(): Settings = settings.first()
 
+    /**
+     * 在 DataStore 事务里读改写：[get] + [edit] 分开写会丢更新——主界面改 API Key
+     * 与悬浮球存位置 / 会话记历史是并发写，后写的一方会把先写的字段覆盖回旧快照。
+     */
     suspend fun update(transform: (Settings) -> Settings) {
-        val current = get()
-        val next = transform(current)
-        settingsStore.edit { prefs -> prefs.writeSettings(next) }
+        settingsStore.edit { prefs ->
+            prefs.writeSettings(transform(prefs.toSettings()))
+        }
     }
 
     /** 把内存里的 API Key 等凭据迁移为加密存储（幂等）。 */
