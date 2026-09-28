@@ -83,7 +83,7 @@
     <string name="notif_channel_name">打牌助手截屏</string>
     <string name="notif_channel_desc">保持截屏通道就绪，用于牌局分析</string>
     <string name="notif_title">打牌助手 运行中</string>
-    <string name="notif_text">点击悬浮球执行当前模式 长按打开菜单</string>
+    <string name="notif_text">点击悬浮球分析当前牌局，长按打开菜单</string>
 
     <!-- 无障碍 -->
     <string name="a11y_desc">用于音量键快捷分析和悬浮球截屏：只有在你主动触发分析时才会截取屏幕，不会读取或输入任何文字。</string>

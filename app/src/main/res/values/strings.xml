@@ -83,7 +83,7 @@
     <string name="notif_channel_name">Card assistant capture</string>
     <string name="notif_channel_desc">Keeps screen capture ready for card analysis</string>
     <string name="notif_title">Card Assistant running</string>
-    <string name="notif_text">Tap the floating ball to run its current mode long-press for menu</string>
+    <string name="notif_text">Tap the floating ball to analyze the board; long-press for the menu</string>
 
     <!-- Accessibility -->
     <string name="a11y_desc">Used for the volume-key shortcut and for taking screenshots while the card assistant runs. The screen is captured only when an analysis is triggered.</string>
