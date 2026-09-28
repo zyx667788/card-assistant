@@ -26,6 +26,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -175,17 +176,34 @@ fun MainScreen(
                         stringResource(R.string.assistant_cloud_title),
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    var apiKey by remember(settings.apiKey) { mutableStateOf(settings.apiKey) }
-                    var baseUrl by remember(settings.baseUrl) { mutableStateOf(settings.baseUrl) }
-                    var model by remember(settings.model) { mutableStateOf(settings.model) }
-                    var timeout by remember(settings.apiTimeoutSeconds) {
-                        mutableStateOf(settings.apiTimeoutSeconds.toString())
+                    // 本地状态一旦被用户编辑过就不再回灌：DataStore 写盘有延迟，若每次都按
+                    // 存储值重建状态，刚敲进去的字会被上一次落盘的结果覆盖。
+                    var apiKey by remember { mutableStateOf(settings.apiKey) }
+                    var apiKeyEdited by remember { mutableStateOf(false) }
+                    LaunchedEffect(settings.apiKey, apiKeyEdited) {
+                        if (!apiKeyEdited) apiKey = settings.apiKey
+                    }
+                    var baseUrl by remember { mutableStateOf(settings.baseUrl) }
+                    var baseUrlEdited by remember { mutableStateOf(false) }
+                    LaunchedEffect(settings.baseUrl, baseUrlEdited) {
+                        if (!baseUrlEdited) baseUrl = settings.baseUrl
+                    }
+                    var model by remember { mutableStateOf(settings.model) }
+                    var modelEdited by remember { mutableStateOf(false) }
+                    LaunchedEffect(settings.model, modelEdited) {
+                        if (!modelEdited) model = settings.model
+                    }
+                    var timeout by remember { mutableStateOf(settings.apiTimeoutSeconds.toString()) }
+                    var timeoutEdited by remember { mutableStateOf(false) }
+                    LaunchedEffect(settings.apiTimeoutSeconds, timeoutEdited) {
+                        if (!timeoutEdited) timeout = settings.apiTimeoutSeconds.toString()
                     }
                     var keyVisible by remember { mutableStateOf(false) }
 
                     OutlinedTextField(
                         value = apiKey,
                         onValueChange = {
+                            apiKeyEdited = true
                             apiKey = it
                             viewModel.update { s -> s.copy(apiKey = it) }
                         },
@@ -209,6 +227,7 @@ fun MainScreen(
                     OutlinedTextField(
                         value = baseUrl,
                         onValueChange = {
+                            baseUrlEdited = true
                             baseUrl = it
                             viewModel.update { s -> s.copy(baseUrl = it) }
                         },
@@ -219,6 +238,7 @@ fun MainScreen(
                     OutlinedTextField(
                         value = model,
                         onValueChange = {
+                            modelEdited = true
                             model = it
                             viewModel.update { s -> s.copy(model = it) }
                         },
@@ -230,6 +250,7 @@ fun MainScreen(
                     OutlinedTextField(
                         value = timeout,
                         onValueChange = { raw ->
+                            timeoutEdited = true
                             timeout = raw
                             raw.toIntOrNull()?.let { v ->
                                 viewModel.update { s -> s.copy(apiTimeoutSeconds = v.coerceIn(10, 300)) }
