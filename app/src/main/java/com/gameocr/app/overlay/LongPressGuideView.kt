@@ -23,6 +23,7 @@ internal class LongPressGuideView(context: Context) : View(context) {
         strokeWidth = 4f * density
     }
     private var progress = 0f
+    private val oval = RectF()
     private var animator: ValueAnimator? = null
 
     init {
@@ -66,7 +67,7 @@ internal class LongPressGuideView(context: Context) : View(context) {
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val inset = 3.5f * density
-        val oval = RectF(inset, inset, width - inset, height - inset)
+        oval.set(inset, inset, width - inset, height - inset)
         canvas.drawOval(oval, trackPaint)
         canvas.drawArc(oval, -90f, 360f * progress, false, progressPaint)
     }

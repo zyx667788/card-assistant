@@ -34,11 +34,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.gameocr.app.R
 import com.gameocr.app.capture.CaptureStartRequestActivity
 import com.gameocr.app.service.CaptureService
 import com.gameocr.app.service.CaptureServiceState
@@ -65,11 +67,14 @@ fun MainScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "打牌助手",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
             )
             Text(
-                text = if (serviceRunning) "● 悬浮球服务运行中" else "○ 悬浮球服务未启动",
+                text = stringResource(
+                    if (serviceRunning) R.string.assistant_service_running
+                    else R.string.assistant_service_stopped
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = if (serviceRunning)
                     MaterialTheme.colorScheme.primary
@@ -87,7 +92,7 @@ fun MainScreen(
                     onClick = { context.startService(CaptureService.stopIntent(context)) }
                 ) {
                     Icon(Icons.Default.Stop, contentDescription = null)
-                    Text("  停止悬浮球服务")
+                    Text("  " + stringResource(R.string.assistant_stop_service))
                 }
             } else {
                 Button(
@@ -97,7 +102,7 @@ fun MainScreen(
                     }
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null)
-                    Text("  启动悬浮球")
+                    Text("  " + stringResource(R.string.assistant_start_service))
                 }
             }
 
@@ -111,9 +116,12 @@ fun MainScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    Text("牌局模式", style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "不同模式用不同的提示词看牌、出主意；切换后点悬浮球即按新模式分析。",
+                        stringResource(R.string.assistant_game_mode_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        stringResource(R.string.assistant_game_mode_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -163,7 +171,10 @@ fun MainScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Text("云端识别配置", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.assistant_cloud_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     var apiKey by remember(settings.apiKey) { mutableStateOf(settings.apiKey) }
                     var baseUrl by remember(settings.baseUrl) { mutableStateOf(settings.baseUrl) }
                     var model by remember(settings.model) { mutableStateOf(settings.model) }
@@ -178,13 +189,18 @@ fun MainScreen(
                             apiKey = it
                             viewModel.update { s -> s.copy(apiKey = it) }
                         },
-                        label = { Text("API Key") },
+                        label = { Text(stringResource(R.string.assistant_api_key_label)) },
                         placeholder = { Text("sk-…") },
                         visualTransformation = if (keyVisible) VisualTransformation.None
                             else PasswordVisualTransformation(),
                         trailingIcon = {
                             androidx.compose.material3.TextButton(onClick = { keyVisible = !keyVisible }) {
-                                Text(if (keyVisible) "隐藏" else "显示")
+                                Text(
+                                    stringResource(
+                                        if (keyVisible) R.string.assistant_hide_secret
+                                        else R.string.assistant_show_secret
+                                    )
+                                )
                             }
                         },
                         singleLine = true,
@@ -196,7 +212,7 @@ fun MainScreen(
                             baseUrl = it
                             viewModel.update { s -> s.copy(baseUrl = it) }
                         },
-                        label = { Text("Base URL（OpenAI 兼容）") },
+                        label = { Text(stringResource(R.string.assistant_base_url_label)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
@@ -206,7 +222,7 @@ fun MainScreen(
                             model = it
                             viewModel.update { s -> s.copy(model = it) }
                         },
-                        label = { Text("视觉模型") },
+                        label = { Text(stringResource(R.string.assistant_vision_model_label)) },
                         placeholder = { Text("deepseek-flash") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
@@ -219,14 +235,13 @@ fun MainScreen(
                                 viewModel.update { s -> s.copy(apiTimeoutSeconds = v.coerceIn(10, 300)) }
                             }
                         },
-                        label = { Text("请求超时（秒）") },
+                        label = { Text(stringResource(R.string.assistant_timeout_label)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
                     )
                     Text(
-                        "VLM 看整张截图识别牌局，文本模型在合法动作里做决策。" +
-                            "默认 DeepSeek，也可填任何 OpenAI 兼容接口。",
+                        stringResource(R.string.assistant_cloud_desc),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -238,13 +253,16 @@ fun MainScreen(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Text("使用说明", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        stringResource(R.string.assistant_usage_title),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
                     listOf(
-                        "1. 先在上面选好牌局模式（跑胡子 / 斗地主），再点「启动悬浮球」。",
-                        "2. 按提示授予悬浮窗 / 截屏权限。",
-                        "3. 打开对应牌局，点一下悬浮球即分析当前牌面。",
-                        "4. 悬浮卡展示 VLM 识别的牌局与 AI 建议，可核对后自行决策。",
-                        "5. 换一局时点悬浮卡上的「新开一局」，清空上局记忆。",
+                        stringResource(R.string.assistant_usage_step_1),
+                        stringResource(R.string.assistant_usage_step_2),
+                        stringResource(R.string.assistant_usage_step_3),
+                        stringResource(R.string.assistant_usage_step_4),
+                        stringResource(R.string.assistant_usage_step_5),
                     ).forEach { line ->
                         Text(
                             line,
@@ -261,7 +279,7 @@ fun MainScreen(
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Text(
-                    "仅供学习娱乐，请遵守当地法律法规与平台规则",
+                    stringResource(R.string.assistant_disclaimer),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

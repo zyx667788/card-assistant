@@ -42,7 +42,7 @@ internal class FloatingMenuTourOverlay(
         if (celebration) {
             card.addView(
                 TextView(context).apply {
-                    text = "\uD83C\uDF89  \u2728  \uD83C\uDF8A"
+                    text = context.getString(R.string.floating_tour_celebration)
                     gravity = Gravity.CENTER
                     textSize = 32f
                     alpha = 0f
@@ -326,8 +326,7 @@ internal class FloatingMenuTourOverlay(
             x = dp(16)
             y = dp(28)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                layoutInDisplayCutoutMode = floatingWindowCutoutMode(Build.VERSION.SDK_INT)
             }
         }
         runCatching {

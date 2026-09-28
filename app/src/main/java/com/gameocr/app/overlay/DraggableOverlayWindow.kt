@@ -102,12 +102,7 @@ class DraggableOverlayWindow(
     @Volatile var widthDp: Int = 320
     @Volatile var heightDp: Int = 180
 
-    private val overlayType: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-    } else {
-        @Suppress("DEPRECATION")
-        WindowManager.LayoutParams.TYPE_PHONE
-    }
+    private val overlayType: Int = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
     private val wm: WindowManager by lazy { createDisplayBoundWm() }
 
@@ -772,6 +767,8 @@ class DraggableOverlayWindow(
 
     /** 状态栏 + cutout 顶部高度（动态获取，跟随旋转）。横屏时通常为 0 或很小；竖屏在 24-32dp 之间。
      *  旋转屏幕后用户原 y 坐标可能落到新方向的状态栏后面，用这个值推下来避开。 */
+    // API 26-29 没有 WindowMetrics/Insets 可读，只能退回 android internal dimen，拿不到就用 24dp 兜底。
+    @SuppressLint("DiscouragedApi", "InternalInsetResource")
     private fun statusBarHeightPx(): Int {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return runCatching {
@@ -835,8 +832,7 @@ class DraggableOverlayWindow(
             PixelFormat.TRANSLUCENT
         ).apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                layoutInDisplayCutoutMode = floatingWindowCutoutMode(Build.VERSION.SDK_INT)
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 fitInsetsTypes = 0

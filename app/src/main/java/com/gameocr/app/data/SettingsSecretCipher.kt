@@ -1,5 +1,6 @@
 package com.gameocr.app.data
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.content.pm.Signature
@@ -72,18 +73,21 @@ class AndroidKeystoreSettingsSecretCipher @Inject constructor(
 
     // Read-only compatibility for existing fb: records. Never write new fallback ciphertext.
     private val fallbackKey: SecretKey by lazy {
-        val androidId = AndroidSettings.Secure.getString(
-            context.contentResolver,
-            AndroidSettings.Secure.ANDROID_ID
-        ).orEmpty()
         val material = listOf(
             FALLBACK_KEY_PURPOSE,
             context.packageName,
-            androidId,
+            legacyAndroidId(),
             signingCertificateDigest()
         ).joinToString(separator = "\u001f")
         SecretKeySpec(sha256(material.toByteArray(Charsets.UTF_8)), KeyProperties.KEY_ALGORITHM_AES)
     }
+
+    // ANDROID_ID 只作为旧记录兼容密钥的 KDF 输入，不作为设备标识使用；新写入一律走 AndroidKeyStore。
+    @SuppressLint("HardwareIds")
+    private fun legacyAndroidId(): String = AndroidSettings.Secure.getString(
+        context.contentResolver,
+        AndroidSettings.Secure.ANDROID_ID
+    ).orEmpty()
 
     @Synchronized
     private fun getOrCreateKey(): SecretKey {

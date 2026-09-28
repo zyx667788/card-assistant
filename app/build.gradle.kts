@@ -87,6 +87,18 @@ android {
         buildConfig = true
     }
 
+    bundle {
+        language {
+            // 应用内自管 locale（AppLocalePrefs + localeConfig）：关闭 AAB 语言分包，
+            // 否则只下发设备语言的资源，切语言后会回退到默认字符串。
+            enableSplit = false
+        }
+    }
+
+    lint {
+        // 只发 arm64-v8a（见 defaultConfig.ndk），ChromeOS x86_64 不在支持范围。
+        disable += "ChromeOsAbiSupport"
+    }
 }
 
 dependencies {

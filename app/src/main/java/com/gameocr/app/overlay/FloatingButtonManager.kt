@@ -24,6 +24,7 @@ import com.gameocr.app.data.InputTranslationDoubleAction
 import com.gameocr.app.data.MenuItemId
 import com.gameocr.app.data.SettingsRepository
 import com.gameocr.app.data.normalizedFloatingButtonAlpha
+import timber.log.Timber
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -158,7 +159,7 @@ class FloatingButtonManager(
             val windowContext = context.createWindowContext(display, overlayType, null)
             windowContext.getSystemService(WindowManager::class.java) ?: defaultWm
         }.getOrElse {
-            android.util.Log.e("FBM", "createWindowContext failed", it)
+            Timber.tag("FBM").e(it, "createWindowContext failed")
             defaultWm
         }
     }
@@ -224,12 +225,7 @@ class FloatingButtonManager(
     private val dockSide: LiquidFloatingContainer.DockSide
         get() = liquidView?.side ?: LiquidFloatingContainer.DockSide.NONE
 
-    private val overlayType: Int = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-    } else {
-        @Suppress("DEPRECATION")
-        WindowManager.LayoutParams.TYPE_PHONE
-    }
+    private val overlayType: Int = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
     fun isShown(): Boolean = view != null
 
@@ -326,7 +322,7 @@ class FloatingButtonManager(
             // 物理 X=147，球永远贴不到屏幕物理边。同时**arcMenu menuParams 也必须设 ALWAYS**，
             // 否则两个 window 原点不一致 → 按钮 root 本地坐标对应物理位置偏 cutout 宽，弧菜单歪斜。
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                layoutInDisplayCutoutMode = floatingWindowCutoutMode(Build.VERSION.SDK_INT)
             }
         }
 
@@ -419,11 +415,11 @@ class FloatingButtonManager(
      */
     fun onConfigurationChanged() {
         val params = layoutParams ?: run {
-            android.util.Log.w("FBM", "onConfigurationChanged: layoutParams null, skip")
+            Timber.tag("FBM").w("onConfigurationChanged: layoutParams null, skip")
             return
         }
         val v = view ?: run {
-            android.util.Log.w("FBM", "onConfigurationChanged: view null, skip")
+            Timber.tag("FBM").w("onConfigurationChanged: view null, skip")
             return
         }
         val (screenW, screenH) = currentScreenSize()
@@ -1281,13 +1277,13 @@ class FloatingButtonManager(
     /** 真正展开某一页菜单（含必要时的腾位 spring）。翻页按钮 / 入口都走这里。 */
     private fun openArcMenuPage(pageIndex: Int) {
         localeMenuPage = pageIndex
-        android.util.Log.d(TAG_MENU, "openArcMenuPage(page=$pageIndex) arcMenuView=${arcMenuView != null} positionBeforeMenu=$positionBeforeMenu")
+        Timber.tag(TAG_MENU).d("openArcMenuPage(page=$pageIndex) arcMenuView=${arcMenuView != null} positionBeforeMenu=$positionBeforeMenu")
         if (arcMenuView != null) {
-            android.util.Log.d(TAG_MENU, "  skip: arcMenuView already exists")
+            Timber.tag(TAG_MENU).d("  skip: arcMenuView already exists")
             return
         }
         val params = layoutParams ?: run {
-            android.util.Log.w(TAG_MENU, "  abort: layoutParams null")
+            Timber.tag(TAG_MENU).w("  abort: layoutParams null")
             return
         }
 
@@ -1353,13 +1349,13 @@ class FloatingButtonManager(
         // 外才 spring；range 内直接展开，不打扰用户。翻页时 positionBeforeMenu != null 跳过 spring。
         val yRange = menuYRange()
         val needsMove = params.y < yRange.first || params.y > yRange.last
-        android.util.Log.d(TAG_MENU, "  itemCount=$itemCount params=(${params.x},${params.y},${params.width}x${params.height}) screen=${screenW}x${screenH} dock=$dockSide cy=$cy yRange=$yRange needsMove=$needsMove positionBeforeMenu=$positionBeforeMenu")
+        Timber.tag(TAG_MENU).d("  itemCount=$itemCount params=(${params.x},${params.y},${params.width}x${params.height}) screen=${screenW}x${screenH} dock=$dockSide cy=$cy yRange=$yRange needsMove=$needsMove positionBeforeMenu=$positionBeforeMenu")
         if (needsMove && positionBeforeMenu == null) {
             positionBeforeMenu = params.x to params.y
             val targetY = params.y.coerceIn(yRange.first, yRange.last.coerceAtLeast(yRange.first))
-            android.util.Log.d(TAG_MENU, "  → spring ball y ${params.y} -> $targetY, x unchanged ${params.x}")
+            Timber.tag(TAG_MENU).d("  → spring ball y ${params.y} -> $targetY, x unchanged ${params.x}")
             springBallToThen(params.x, targetY) {
-                android.util.Log.d(TAG_MENU, "  ← spring settled, reopen page=$pageIndex")
+                Timber.tag(TAG_MENU).d("  ← spring settled, reopen page=$pageIndex")
                 openArcMenuPage(pageIndex)
             }
             return
@@ -1475,13 +1471,21 @@ class FloatingButtonManager(
             // 否则两个 window 原点差 (cutout, status bar) → 按钮 root 本地坐标对应的物理位置
             // 与球物理位置偏 (147, 147)，弧菜单整体歪斜不绕球。
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                layoutInDisplayCutoutMode = floatingWindowCutoutMode(Build.VERSION.SDK_INT)
             }
         }
         val addResult = runCatching { wm.addView(root, menuParams) }
         arcMenuView = root
-        android.util.Log.d(TAG_MENU, "  addView root success=${addResult.isSuccess} buttons=${pageItems.size} baseAngle=${"%.2f".format(Math.toDegrees(baseAngle))}° spread=±${"%.2f".format(Math.toDegrees(spread))}°")
-        addResult.exceptionOrNull()?.let { android.util.Log.e(TAG_MENU, "  addView failed", it) }
+        val baseAngleDeg = "%.2f".format(Math.toDegrees(baseAngle))
+        val spreadDeg = "%.2f".format(Math.toDegrees(spread))
+        Timber.tag(TAG_MENU).d(
+            "  addView root success=%s buttons=%d baseAngle=%s° spread=±%s°",
+            addResult.isSuccess,
+            pageItems.size,
+            baseAngleDeg,
+            spreadDeg,
+        )
+        addResult.exceptionOrNull()?.let { Timber.tag(TAG_MENU).e(it, "  addView failed") }
         if (addResult.isSuccess && tourStage != TourStage.NONE) {
             if (tourStage == TourStage.WAITING_FOR_LONG_PRESS) {
                 tourStage = TourStage.MENU_ITEMS
@@ -1499,7 +1503,7 @@ class FloatingButtonManager(
     }
 
     private fun dismissArcMenu(restorePosition: Boolean = true) {
-        android.util.Log.d(TAG_MENU, "dismissArcMenu(restore=$restorePosition) hadView=${arcMenuView != null} positionBeforeMenu=$positionBeforeMenu")
+        Timber.tag(TAG_MENU).d("dismissArcMenu(restore=$restorePosition) hadView=${arcMenuView != null} positionBeforeMenu=$positionBeforeMenu")
         stopTourPulse()
         restoreMenuTourVisuals()
         arcMenuView?.let { runCatching { wm.removeView(it) } }
@@ -1507,7 +1511,7 @@ class FloatingButtonManager(
         if (restorePosition) {
             positionBeforeMenu?.let { (origX, origY) ->
                 positionBeforeMenu = null
-                android.util.Log.d(TAG_MENU, "  rollback ball to ($origX,$origY)")
+                Timber.tag(TAG_MENU).d("  rollback ball to ($origX,$origY)")
                 springBallTo(origX, origY)
             }
         }
@@ -1524,7 +1528,7 @@ class FloatingButtonManager(
     private fun springBallToThen(targetX: Int, targetY: Int, onSettle: (() -> Unit)?) {
         val v = view ?: return
         val params = layoutParams ?: return
-        android.util.Log.d(TAG_MENU, "springBallToThen from (${params.x},${params.y}) -> ($targetX,$targetY) hasOnSettle=${onSettle != null}")
+        Timber.tag(TAG_MENU).d("springBallToThen from (${params.x},${params.y}) -> ($targetX,$targetY) hasOnSettle=${onSettle != null}")
         snapAnimX?.cancel(); snapAnimY?.cancel()
         if (targetX != params.x) {
             snapAnimX = SpringAnimation(FloatValueHolder(params.x.toFloat())).apply {
@@ -1555,7 +1559,7 @@ class FloatingButtonManager(
             }
             if (onSettle != null) {
                 addEndListener { _, canceled, value, _ ->
-                    android.util.Log.d(TAG_MENU, "  spring Y end value=$value canceled=$canceled")
+                    Timber.tag(TAG_MENU).d("  spring Y end value=$value canceled=$canceled")
                     if (!canceled) onSettle()
                 }
             }

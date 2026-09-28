@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.gameocr.app.R
 import com.gameocr.app.data.SettingsRepository
 import com.gameocr.app.game.core.AdviceAction
 import com.gameocr.app.game.core.GameAdvice
@@ -57,14 +58,28 @@ class GameAdviceOverlay(
                 buildReadyContent(outcome.state.toPromptText(), outcome.advice)
             )
             is GameTurnOutcome.RecognitionFailed -> content.addView(
-                buildMessageContent("识别失败", outcome.message, isError = true)
+                buildMessageContent(
+                    context.getString(R.string.advice_error_recognition),
+                    outcome.message,
+                    isError = true,
+                )
             )
             is GameTurnOutcome.AdviceFailed -> {
                 content.addView(buildRecognizedContent(outcome.state.toPromptText()))
-                content.addView(buildMessageContent("建议获取失败", outcome.message, isError = true))
+                content.addView(
+                    buildMessageContent(
+                        context.getString(R.string.advice_error_advice),
+                        outcome.message,
+                        isError = true,
+                    )
+                )
             }
             is GameTurnOutcome.Error -> content.addView(
-                buildMessageContent("无法分析牌局", outcome.message, isError = true)
+                buildMessageContent(
+                    context.getString(R.string.advice_error_analyze),
+                    outcome.message,
+                    isError = true,
+                )
             )
         }
         content.addView(buildActions(onRerun, onNewGame))
@@ -74,23 +89,25 @@ class GameAdviceOverlay(
     private fun buildReadyContent(stateText: String, advice: GameAdvice): View {
         val root = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
         val actionText = when (advice.action) {
-            AdviceAction.PLAY -> "出牌"
-            AdviceAction.CHOW -> "吃牌"
-            AdviceAction.PUNG -> "碰牌"
-            AdviceAction.KONG -> "提牌"
-            AdviceAction.WIN -> "胡牌"
-            AdviceAction.PASS -> "过牌"
-            AdviceAction.UNKNOWN -> "待确认"
+            AdviceAction.PLAY -> context.getString(R.string.advice_action_play)
+            AdviceAction.CHOW -> context.getString(R.string.advice_action_chow)
+            AdviceAction.PUNG -> context.getString(R.string.advice_action_pung)
+            AdviceAction.KONG -> context.getString(R.string.advice_action_kong)
+            AdviceAction.WIN -> context.getString(R.string.advice_action_win)
+            AdviceAction.PASS -> context.getString(R.string.advice_action_pass)
+            AdviceAction.UNKNOWN -> context.getString(R.string.advice_action_unknown)
         } + advice.targetTile?.takeIf { it.isNotBlank() }?.let { " $it" }.orEmpty()
 
-        root.addView(label("建议", 13f, 0xFF9E9E9E.toInt()))
+        root.addView(label(context.getString(R.string.advice_section_title), 13f, 0xFF9E9E9E.toInt()))
         root.addView(text(actionText, 28f, 0xFFFFD166.toInt(), bold = true))
         if (advice.reason.isNotBlank()) {
             root.addView(text(advice.reason, 15f, Color.WHITE))
         }
         if (advice.alternatives.isNotEmpty()) {
             root.addView(spacer(dp(8)))
-            root.addView(label("备选", 13f, 0xFF9E9E9E.toInt()))
+            root.addView(
+                label(context.getString(R.string.advice_section_alternatives), 13f, 0xFF9E9E9E.toInt())
+            )
             advice.alternatives.forEach { root.addView(text("• $it", 14f, 0xFFE0E0E0.toInt())) }
         }
         root.addView(spacer(dp(12)))
@@ -109,7 +126,14 @@ class GameAdviceOverlay(
             setColor(0x332D9CDB)
         }
         setPadding(dp(10), dp(9), dp(10), dp(9))
-        addView(label("识别结果（请核对）", 13f, 0xFF90CAF9.toInt(), bold = true))
+        addView(
+            label(
+                context.getString(R.string.advice_section_recognized),
+                13f,
+                0xFF90CAF9.toInt(),
+                bold = true,
+            )
+        )
         addView(spacer(dp(4)))
         addView(text(stateText.trim(), 13f, 0xFFE0E0E0.toInt()))
     }
@@ -127,8 +151,12 @@ class GameAdviceOverlay(
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.END
             setPadding(0, dp(10), 0, 0)
-            addView(actionButton("重新识别") { dismiss(); onRerun() })
-            addView(actionButton("新开局") { dismiss(); onNewGame() })
+            addView(
+                actionButton(context.getString(R.string.advice_action_rerun)) { dismiss(); onRerun() }
+            )
+            addView(
+                actionButton(context.getString(R.string.advice_action_new_game)) { dismiss(); onNewGame() }
+            )
         }
 
     private fun actionButton(labelText: String, action: () -> Unit): Button =

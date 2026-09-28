@@ -3,7 +3,6 @@ package com.gameocr.app.overlay
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -27,11 +26,7 @@ class CardHintOverlay(context: Context) {
     private var loadingView: View? = null
     private var hintView: View? = null
 
-    private val overlayType: Int =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        else
-            @Suppress("DEPRECATION") WindowManager.LayoutParams.TYPE_PHONE
+    private val overlayType: Int = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
 
     private fun newLayoutParams(): WindowManager.LayoutParams =
         WindowManager.LayoutParams(

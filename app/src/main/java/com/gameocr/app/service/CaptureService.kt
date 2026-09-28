@@ -140,11 +140,16 @@ class CaptureService : Service() {
         }
 
         // 前台服务：Android 14+ 必须显式传非零 type，否则 InvalidForegroundServiceTypeException。
-        // MediaProjection 路径走 MEDIA_PROJECTION；Shizuku 路径走 SPECIAL_USE。
+        // MediaProjection 路径全程走 MEDIA_PROJECTION；Shizuku / 无障碍路径在 34+ 走 SPECIAL_USE。
         val fgType = when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.Q -> 0
-            useShizuku || useAccessibility -> android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
-            else -> android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            !useShizuku && !useAccessibility ->
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE ->
+                android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            // SPECIAL_USE 是 API 34 才加入的 type；29..33 上传平台不认识的 type 位
+            // 不符合契约，Shizuku / 无障碍路径在这些版本上不声明 type。
+            else -> 0
         }
         // Android 14+ HyperOS/MIUI 上常见 race：CaptureStartRequestActivity onActivityResult
         // 收到 RESULT_OK 后立即 startForegroundService，此时 `android:project_media` app-op
@@ -346,7 +351,9 @@ class CaptureService : Service() {
     private fun triggerGameAdviceAnalysis() {
         if (gameAdviceJob?.isActive == true) return
         if (!captureLock.tryLock()) {
-            mainScope.launch { hintOverlay?.showErrorHint("正在处理上一帧，请稍候", 2500L) }
+            mainScope.launch {
+                hintOverlay?.showErrorHint(getString(R.string.assistant_hint_busy), 2500L)
+            }
             return
         }
         gameAdviceJob = scope.launch {
@@ -360,7 +367,7 @@ class CaptureService : Service() {
                 if (bitmap == null) {
                     withContext(Dispatchers.Main) {
                         hintOverlay?.dismissLoading()
-                        hintOverlay?.showErrorHint("截图失败，请确认截屏服务仍在运行")
+                        hintOverlay?.showErrorHint(getString(R.string.assistant_hint_capture_failed))
                     }
                     return@launch
                 }
@@ -416,7 +423,7 @@ class CaptureService : Service() {
     private fun shortError(t: Throwable): String {
         val raw = t.message?.trim().orEmpty()
         return when {
-            raw.isEmpty() -> "出错了：${t.javaClass.simpleName}"
+            raw.isEmpty() -> getString(R.string.assistant_error_format, t.javaClass.simpleName)
             raw.length <= 120 -> raw
             else -> raw.take(117) + "…"
         }

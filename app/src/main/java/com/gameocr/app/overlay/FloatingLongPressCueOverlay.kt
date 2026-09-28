@@ -70,8 +70,7 @@ internal class FloatingLongPressCueOverlay(
             y = (ballBounds.centerY() - dp(22))
                 .coerceIn(dp(24), (screenBounds.height() - dp(72)).coerceAtLeast(dp(24)))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                layoutInDisplayCutoutMode =
-                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+                layoutInDisplayCutoutMode = floatingWindowCutoutMode(Build.VERSION.SDK_INT)
             }
         }
         runCatching {
