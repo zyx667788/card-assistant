@@ -45,28 +45,9 @@
     <string name="advice_action_rerun">Re-analyze</string>
     <string name="advice_action_new_game">New game</string>
 
-    <!-- Common -->
-
     <!-- Main -->
 
-
-    <string name="quick_settings_tile_label">Screen translation</string>
-
-    <!-- Settings -->
-
-
-    <!-- TTS output -->
-
-    <!-- Translation engine connection test -->
-
-
-    <!-- Settings search index labels -->
-
-    <!-- manga-ocr 端侧（l0wgear/manga-ocr-2025-onnx，日漫专用，~160MB，需开代理） -->
-
-    <!-- Logs page -->
-
-    <!-- Language picker -->
+    <string name="quick_settings_tile_label">Card assistant capture</string>
 
     <!-- CaptureService toasts -->
     <string name="toast_capture_failed">Capture failed: no frame. Try restarting capture.</string>
@@ -98,38 +79,15 @@
     <string name="log_msg_capture_failed">Capture failed: no frame (may need to re-authorize / Shizuku unavailable)</string>
     <string name="log_msg_shizuku_dry_run_failed">Shizuku dry-run failed at service start — likely not paired via ADB. Stopped capture service.</string>
 
-    <!-- Engine name labels -->
-
     <!-- Notification -->
-    <string name="notif_channel_name">Capture &amp; translate service</string>
-    <string name="notif_channel_desc">Foreground capture + OCR + translate</string>
+    <string name="notif_channel_name">Card assistant capture</string>
+    <string name="notif_channel_desc">Keeps screen capture ready for card analysis</string>
     <string name="notif_title">Card Assistant running</string>
     <string name="notif_text">Tap the floating ball to run its current mode long-press for menu</string>
 
     <!-- Accessibility -->
-    <string name="a11y_desc">Used for volume-key shortcuts and Input Translation. Input-field text is read only when you tap the floating ball; password input fields are never read.</string>
+    <string name="a11y_desc">Used for the volume-key shortcut and for taking screenshots while the card assistant runs. The screen is captured only when an analysis is triggered.</string>
     <string name="a11y_summary">Card Assistant shortcuts</string>
-
-    <!-- Baidu OCR endpoint names / quotas -->
-
-    <!-- OCR language parameter (Baidu language_type / Tencent LanguageType) -->
-
-    <!-- Source-language → OCR engine linkage prompt -->
-
-    <!-- Check for updates (GitHub Releases API) -->
-
-    <!-- Tencent OCR endpoint names / desc -->
-
-    <!-- Region picker -->
-
-    <!-- Default prompt -->
-
-    <!-- Engine error messages (surface to toast / overlay [!] marker / log page) -->
-
-    <!-- 端侧 LLM 翻译 -->
-    <!-- Shared confirm dialog for deleting any of the three on-device models -->
-
-    <!-- Language names (matched 1:1 to Languages.kt nameRes) -->
 
     <!-- 0.4: arc menu skill switching + word selection translation -->
     <string name="menu_word_select">Word Select</string>
@@ -145,7 +103,7 @@
     <string name="floating_tour_skip">Skip tour</string>
     <string name="floating_tour_skip_confirm_progress">Floating ball tour</string>
     <string name="floating_tour_skip_confirm_title">Skip this tour?</string>
-    <string name="floating_tour_skip_confirm_body">The floating-ball walkthrough will close. To run it again, open Help in the Screenshot service card on the home screen and finish the setup guide. If the screenshot service is off, the walkthrough starts the next time you enable it.</string>
+    <string name="floating_tour_skip_confirm_body">The floating-ball walkthrough will close. To run it again, restart the floating-ball service from the home screen.</string>
     <string name="floating_tour_continue">Continue tour</string>
     <string name="floating_tour_confirm_skip">Confirm skip</string>
     <string name="floating_tour_next">Next</string>
@@ -153,14 +111,15 @@
     <string name="floating_tour_done">Done</string>
     <string name="floating_tour_complete_progress">Floating ball tour complete</string>
     <string name="floating_tour_complete_title">You’re ready to go!</string>
-    <string name="floating_tour_complete_body">You’ve met every floating-ball action. Long-press the main ball to reopen the menu; Next group changes pages and loops back to the first group from the last page.</string>
+    <string name="floating_tour_complete_body">You’ve seen every floating-ball action. Long-press the main ball to reopen the menu at any time.</string>
     <string name="floating_tour_start_using">Start using</string>
     <string name="floating_tour_loop_body">Switches the main ball to loop translation. Tap the main ball afterward to start or stop repeated translation.</string>
     <string name="floating_tour_region_body">Changes the screenshot area without leaving the current app.</string>
     <string name="floating_tour_language_body">Quickly changes the source and target languages used for translation.</string>
     <string name="floating_tour_preset_body">Switches between saved OCR, translation, language, TTS, and display presets.</string>
     <string name="floating_tour_settings_body">Opens the full settings screen for detailed configuration.</string>
-    <string name="floating_tour_home_body">Returns to the Screen Translator home screen.</string>
+    <string name="floating_tour_game_assistant_body">Runs one board analysis: captures the screen, sends it to your configured vision model, and shows the suggestion card.</string>
+    <string name="floating_tour_home_body">Returns to the Card Assistant home screen.</string>
     <string name="floating_tour_word_select_body">Switches the main ball to word-select translation. Tap the main ball afterward, then drag a box around the text to translate.</string>
     <string name="floating_tour_full_screen_body">Switches the main ball to full-screen translation. Tap the main ball afterward to capture and translate the configured area.</string>
     <string name="floating_tour_input_translation_body">Switches the main ball to Input Translation. Tap it afterward to translate the text in the current input field.</string>
@@ -175,30 +134,5 @@
     <string name="input_translation_guide_progress">Input Translation</string>
     <string name="input_translation_guide_body">In Input Translation mode:\nTap: translate the text in the current input field.\nDouble tap: run %1$s.\nYou can change the double-tap action in Settings.</string>
     <string name="input_translation_guide_done">Got it</string>
-
-    <!-- Word selection overlay -->
-
-    <!-- Translation card -->
-
-    <!-- 系统文字选中菜单的「屏译翻译」入口 -->
-
-    <!-- Settings: arc menu order -->
-
-    <!-- Settings: dictionary prompt -->
-
-    <!-- Text orientation auto-detect -->
-
-
-    <!-- Default dictionary prompt -->
-    <!-- First-run onboarding -->
-
-
-
-
-
-
-
-
-
 
 </resources>

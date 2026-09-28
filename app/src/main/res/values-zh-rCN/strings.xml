@@ -45,27 +45,9 @@
     <string name="advice_action_rerun">重新识别</string>
     <string name="advice_action_new_game">新开局</string>
 
-    <!-- 通用 -->
-
     <!-- 主屏 -->
 
-
-    <string name="quick_settings_tile_label">屏译服务</string>
-
-    <!-- 设置 -->
-
-
-    <!-- 翻译引擎连接测试 -->
-
-
-
-    <!-- 设置搜索索引：itemLabel / 关键词。section 标签复用上面 settings_section_* 即可。 -->
-
-    <!-- manga-ocr 端侧（l0wgear/manga-ocr-2025-onnx，日漫专用，~160MB，需开代理） -->
-
-    <!-- 日志页 -->
-
-    <!-- 语言选择器 -->
+    <string name="quick_settings_tile_label">打牌助手截屏</string>
 
     <!-- CaptureService toast -->
     <string name="toast_capture_failed">截屏失败：未拿到画面，建议重新启动捕获</string>
@@ -97,38 +79,15 @@
     <string name="log_msg_capture_failed">截屏失败：未拿到画面（可能需要重新授权 / Shizuku 不可用）</string>
     <string name="log_msg_shizuku_dry_run_failed">Shizuku dry-run 失败——大概率未通过 ADB 配对。已停止截屏服务。</string>
 
-    <!-- OCR 引擎名（OCR 日志里用到的引擎标签 / overlay 错误 toast 里也用） -->
-
     <!-- 通知 -->
-    <string name="notif_channel_name">截屏翻译服务</string>
-    <string name="notif_channel_desc">前台运行截屏 + OCR + 翻译</string>
+    <string name="notif_channel_name">打牌助手截屏</string>
+    <string name="notif_channel_desc">保持截屏通道就绪，用于牌局分析</string>
     <string name="notif_title">打牌助手 运行中</string>
     <string name="notif_text">点击悬浮球执行当前模式 长按打开菜单</string>
 
     <!-- 无障碍 -->
-    <string name="a11y_desc">用于音量键快捷操作和输入翻译。输入框文字只会在你主动点击操作球时读取；不会读取密码类型的输入框。</string>
+    <string name="a11y_desc">用于音量键快捷分析和悬浮球截屏：只有在你主动触发分析时才会截取屏幕，不会读取或输入任何文字。</string>
     <string name="a11y_summary">打牌助手 快捷操作</string>
-
-    <!-- 百度 OCR endpoint 显示名 / 免费配额 -->
-
-    <!-- OCR 语种参数（百度 language_type / 腾讯 LanguageType） -->
-
-    <!-- 源语言切换时联动 OCR：当前引擎不支持新源语言时弹出 -->
-
-    <!-- 检查更新（GitHub Releases API） -->
-
-    <!-- 腾讯 OCR endpoint 显示名 / desc -->
-
-    <!-- 区域选择器 -->
-
-    <!-- 默认 Prompt -->
-
-    <!-- 引擎抛出的异常 message（最终落到 toast / 译文 [!] 标记 / 日志页） -->
-
-    <!-- 端侧 LLM 翻译 -->
-    <!-- 三处离线模型删除按钮共用的二次确认对话框 -->
-
-    <!-- 语言列表（与 Languages.kt 的 nameRes 一一对应） -->
 
     <!-- 0.4：弧菜单技能切换 + 划词翻译 -->
     <string name="menu_word_select">划词翻译</string>
@@ -143,7 +102,7 @@
     <string name="floating_tour_skip">跳过引导</string>
     <string name="floating_tour_skip_confirm_progress">悬浮球漫游</string>
     <string name="floating_tour_skip_confirm_title">确认跳过本次引导？</string>
-    <string name="floating_tour_skip_confirm_body">跳过后将关闭悬浮球漫游。需要重新运行时，请在首页「截屏服务」卡片中点击「帮助」并完成初始化引导；如果截屏服务未运行，漫游会在下次启用服务时开始。</string>
+    <string name="floating_tour_skip_confirm_body">跳过后将关闭悬浮球漫游。需要重新运行时，在首页重新启动悬浮球服务即可。</string>
     <string name="floating_tour_continue">继续引导</string>
     <string name="floating_tour_confirm_skip">确认跳过</string>
     <string name="floating_tour_next">下一项</string>
@@ -151,14 +110,15 @@
     <string name="floating_tour_done">完成</string>
     <string name="floating_tour_complete_progress">悬浮球漫游完成</string>
     <string name="floating_tour_complete_title">全部认识完啦！</string>
-    <string name="floating_tour_complete_body">你已经认识了所有悬浮球功能。之后长按主悬浮球即可再次打开菜单；「下一组」用于菜单翻页，并会在最后一组循环回到第一组。</string>
+    <string name="floating_tour_complete_body">悬浮球的操作都介绍完了。长按主悬浮球可以随时重新打开菜单。</string>
     <string name="floating_tour_start_using">开始使用</string>
     <string name="floating_tour_loop_body">把主球切换为循环翻译；之后单击主球即可开始或停止重复翻译。</string>
     <string name="floating_tour_region_body">不离开当前应用，直接重新选择截屏区域。</string>
     <string name="floating_tour_language_body">快速切换翻译使用的源语言和目标语言。</string>
     <string name="floating_tour_preset_body">切换已保存的 OCR、翻译、语言、TTS 与显示预设。</string>
     <string name="floating_tour_settings_body">打开完整设置页，调整详细参数。</string>
-    <string name="floating_tour_home_body">返回屏译首页。</string>
+    <string name="floating_tour_game_assistant_body">点一次就分析当前牌局：截屏 → 云端 VLM 看牌 → 弹出建议卡。</string>
+    <string name="floating_tour_home_body">返回打牌助手首页。</string>
     <string name="floating_tour_word_select_body">把主球切换为划词翻译；之后单击主球，再拖框选择需要翻译的文字。</string>
     <string name="floating_tour_full_screen_body">把主球切换为全屏翻译；之后单击主球即可截取并翻译当前设定区域。</string>
     <string name="floating_tour_input_translation_body">把主球切换为输入翻译；之后单击主球即可翻译当前输入框内的文字。</string>
@@ -173,29 +133,5 @@
     <string name="input_translation_guide_progress">输入翻译</string>
     <string name="input_translation_guide_body">在输入翻译模式下：\n单击：翻译当前输入框内的文字。\n双击：执行%1$s。\n可在设置中修改双击功能。</string>
     <string name="input_translation_guide_done">知道了</string>
-
-    <!-- 划词选区 overlay -->
-
-    <!-- 划词翻译卡片 -->
-
-    <!-- 系统文字选中菜单的「屏译翻译」入口 -->
-
-    <!-- 设置：弧菜单按钮顺序 -->
-
-    <!-- 设置：词典 Prompt -->
-
-    <!-- 文本方向自动判别 -->
-
-    <!-- 默认词典 Prompt -->
-    <!-- 初次使用引导 -->
-
-
-
-
-
-
-
-
-
 
 </resources>

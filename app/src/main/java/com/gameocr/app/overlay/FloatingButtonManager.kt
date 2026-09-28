@@ -983,6 +983,7 @@ class FloatingButtonManager(
             else -> context.getString(R.string.floating_tour_next)
         }
         val descriptionRes = when (item.labelRes) {
+            R.string.menu_game_assistant -> R.string.floating_tour_game_assistant_body
             R.string.menu_loop_translate -> R.string.floating_tour_loop_body
             R.string.menu_pick_region -> R.string.floating_tour_region_body
             R.string.menu_language_pair -> R.string.floating_tour_language_body
