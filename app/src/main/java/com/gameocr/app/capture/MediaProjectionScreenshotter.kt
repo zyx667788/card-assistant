@@ -55,14 +55,15 @@ class MediaProjectionScreenshotter(
 
         projection.registerCallback(projectionCallback, handler)
 
-        imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+        val reader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
+        imageReader = reader
         virtualDisplay = projection.createVirtualDisplay(
-            "屏译截屏",
+            "打牌助手截屏",
             width,
             height,
             density,
             MediaProjectionCaptureConfig.virtualDisplayFlags,
-            imageReader!!.surface,
+            reader.surface,
             null,
             handler,
         )
