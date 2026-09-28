@@ -91,20 +91,14 @@ class GameTurnCoordinator @Inject constructor(
     }
 
     /**
-     * 给 VLM 的截图预处理：长边压到 768px、JPEG 质量 75。
-     * 云端视觉模型内部本来就会缩图，先压小可以省流量和上传时间，
-     * 牌面字在这个尺寸下依然清晰可辨。
+     * 给 VLM 的截图预处理：长边压到 [VLM_MAX_SIDE_PX]、JPEG 质量 [VLM_JPEG_QUALITY]。
+     * 斗地主整屏横排十几张牌，768px 时每张牌太窄，VLM 容易把同点同色牌合并；
+     * 1152px 下牌面点数与颜色边界仍清晰，同时体积和上传延迟可控。
      */
     private fun encodeScreenshotForVlm(bitmap: Bitmap): ByteArray {
-        val longest = maxOf(bitmap.width, bitmap.height)
-        val scaled = if (longest > VLM_MAX_SIDE_PX) {
-            val scale = VLM_MAX_SIDE_PX.toFloat() / longest
-            Bitmap.createScaledBitmap(
-                bitmap,
-                (bitmap.width * scale).toInt().coerceAtLeast(1),
-                (bitmap.height * scale).toInt().coerceAtLeast(1),
-                true,
-            )
+        val (targetW, targetH) = vlmTargetSize(bitmap.width, bitmap.height)
+        val scaled = if (targetW != bitmap.width || targetH != bitmap.height) {
+            Bitmap.createScaledBitmap(bitmap, targetW, targetH, true)
         } else {
             bitmap
         }
@@ -117,8 +111,20 @@ class GameTurnCoordinator @Inject constructor(
         }
     }
 
-    private companion object {
-        const val VLM_MAX_SIDE_PX = 768
-        const val VLM_JPEG_QUALITY = 75
+    companion object {
+        const val VLM_MAX_SIDE_PX = 1152
+        const val VLM_JPEG_QUALITY = 85
+
+        /**
+         * 纯函数：给定原图尺寸，算出压到 [VLM_MAX_SIDE_PX] 后的目标尺寸（不放大，保持比例）。
+         * 放在 JVM 里直接可测，避免单测依赖 Bitmap。
+         */
+        @JvmStatic
+        fun vlmTargetSize(width: Int, height: Int, maxSide: Int = VLM_MAX_SIDE_PX): Pair<Int, Int> {
+            val longest = maxOf(width, height)
+            if (longest <= maxSide) return width to height
+            val scale = maxSide.toFloat() / longest
+            return (width * scale).toInt().coerceAtLeast(1) to (height * scale).toInt().coerceAtLeast(1)
+        }
     }
 }
